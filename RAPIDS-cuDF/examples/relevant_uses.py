@@ -1,11 +1,11 @@
 """pandas vs cuDF vs Dask-cuDF benchmark on real public data.
 
 Downloads NYC TLC Yellow Taxi (~50MB), runs the same read -> filter ->
-groupby -> top-N pipeline on each backend, prints per-stage timings in
-ms, then deletes the file. See ../README.md for the bigger industry
-story (IBM x NVIDIA / Velox + cuDF).
+groupby -> top-N pipeline on each backend, and prints per-stage timings.
+See ../README.md for context.
 """
 
+import argparse
 import os
 import sys
 import tempfile
@@ -18,20 +18,45 @@ URL = (
 )
 
 
-def benchmark(lib, path, sync, lazy=False):
-    """Same pipeline against pandas / cuDF / dask-cuDF. Returns ms per step."""
+def check_memory(file_size_mb, scale):
+    """Bail if there isn't enough RAM for ~3 in-memory copies of the scaled data."""
+    try:
+        with open("/proc/meminfo") as f:
+            avail_kb = next(int(l.split()[1]) for l in f if l.startswith("MemAvailable:"))
+        avail_gb = avail_kb / 1024 / 1024
+    except Exception:
+        return
+
+    needed_gb = (file_size_mb * 8 / 1024) * scale * 3 * 1.5
+    if needed_gb > avail_gb:
+        suggested = max(1, int(avail_gb / needed_gb * scale))
+        sys.exit(
+            f"FAIL: ~{needed_gb:.1f} GB needed at scale={scale}, "
+            f"only ~{avail_gb:.1f} GB available. Try --scale {suggested}"
+        )
+    print(f"Memory: ~{needed_gb:.1f} GB needed / ~{avail_gb:.1f} GB available\n")
+
+
+def benchmark(lib, path, sync, scale, lazy=False):
+    """Run read -> filter -> groupby -> top-N. Returns ms per step."""
     times = {}
 
     if lazy:
         import dask
+        import dask.dataframe as dd
 
         def go(x):
-            # synchronous scheduler so persist() blocks until done
             with dask.config.set(scheduler="synchronous"):
                 return x.persist()
+
+        def replicate(df, n):
+            return dd.concat([df] * n)
     else:
         def go(x):
             return x
+
+        def replicate(df, n):
+            return lib.concat([df] * n, ignore_index=True)
 
     # warm up the parquet reader -- cold start dominates the first read
     go(lib.read_parquet(path))
@@ -42,8 +67,11 @@ def benchmark(lib, path, sync, lazy=False):
     sync()
     times["read"] = (time.perf_counter() - t0) * 1000
 
+    big = go(replicate(df, scale))
+    sync()
+
     t0 = time.perf_counter()
-    over10 = go(df[df["fare_amount"] > 10])
+    over10 = go(big[big["fare_amount"] > 10])
     sync()
     times["filter"] = (time.perf_counter() - t0) * 1000
 
@@ -65,10 +93,16 @@ def benchmark(lib, path, sync, lazy=False):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--scale", type=int, default=10,
+                        help="replicate loaded data N times for post-read ops (default: 10)")
+    args = parser.parse_args()
+
     try:
         import pandas as pd
         import cudf
         import cupy as cp
+        import pyarrow.parquet as pq
     except ImportError as e:
         sys.exit(f"FAIL: missing dep -> {e}")
 
@@ -82,15 +116,6 @@ def main():
     bar = "=" * 60
     sub = "-" * 40
 
-    print(bar)
-    print(f"GPU:     {name}")
-    print(f"Dataset: NYC TLC Yellow Taxi 2024-01 (~3M rows)")
-    print(bar)
-    print()
-    print("cuDF in the wild — see ../README.md for the IBM x NVIDIA / Velox story.")
-    print()
-
-    # tempfile lives outside the repo so it can't sneak into a commit
     tmp = tempfile.NamedTemporaryFile(suffix=".parquet", delete=False)
     tmp.close()
     path = tmp.name
@@ -98,7 +123,20 @@ def main():
     try:
         print(f"Downloading {URL.split('/')[-1]} ...")
         urllib.request.urlretrieve(URL, path)
-        print(f"  {os.path.getsize(path) / 1e6:.1f} MB on disk\n")
+        file_size_mb = os.path.getsize(path) / 1e6
+        print(f"  {file_size_mb:.1f} MB on disk\n")
+
+        check_memory(file_size_mb, args.scale)
+
+        n_base = pq.read_metadata(path).num_rows
+        n_scaled = n_base * args.scale
+
+        print(bar)
+        print(f"GPU:     {name}")
+        print(f"Dataset: NYC TLC Yellow Taxi 2024-01")
+        print(f"         {n_base:,} rows, scaled {args.scale}x = {n_scaled:,} rows for ops")
+        print(bar)
+        print()
 
         # one-time GPU warmup so CUDA init isn't billed to anything
         cudf.Series([1, 2, 3]).sum()
@@ -106,11 +144,13 @@ def main():
 
         gpu_sync = cp.cuda.runtime.deviceSynchronize
         results = {
-            "pandas":    benchmark(pd, path, sync=lambda: None),
-            "cuDF":      benchmark(cudf, path, sync=gpu_sync),
+            "pandas": benchmark(pd, path, sync=lambda: None, scale=args.scale),
+            "cuDF":   benchmark(cudf, path, sync=gpu_sync, scale=args.scale),
         }
         if have_dask:
-            results["dask-cuDF"] = benchmark(dask_cudf, path, sync=gpu_sync, lazy=True)
+            results["dask-cuDF"] = benchmark(
+                dask_cudf, path, sync=gpu_sync, scale=args.scale, lazy=True
+            )
 
         for step in results["pandas"]:
             print(f"[{step}]")
@@ -121,26 +161,12 @@ def main():
                 if lib_name == "pandas":
                     print(f"  {lib_name:<10} {ms:>8.1f} ms")
                 else:
-                    speedup = base / ms if ms > 0 else float("inf")
-                    print(f"  {lib_name:<10} {ms:>8.1f} ms  ({speedup:>5.1f}x vs pandas)")
+                    print(f"  {lib_name:<10} {ms:>8.1f} ms  ({base/ms:>5.1f}x vs pandas)")
             print()
-
-        print(bar)
-        print("Notes")
-        print(sub)
-        print("- GB10 / Grace Blackwell is an SoC with unified memory between")
-        print("  the ARM CPU and Blackwell GPU (no PCIe transfers between them).")
-        print("- Dask-cuDF on a single GPU adds scheduler overhead vs plain cuDF.")
-        print("  It pays off when scaling across multiple GPUs / nodes (e.g. a")
-        print("  DGX Spark cluster of GB10s).")
-        if not have_dask:
-            print("- dask-cuDF isn't installed; that comparison was skipped.")
-            print("  install: conda install -c rapidsai -c conda-forge -c nvidia dask-cudf")
-        print(bar)
     finally:
         if os.path.exists(path):
             os.remove(path)
-            print(f"\nCleaned up {path}")
+            print(f"Cleaned up {path}")
 
 
 if __name__ == "__main__":
