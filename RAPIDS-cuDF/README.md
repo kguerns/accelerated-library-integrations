@@ -53,7 +53,7 @@ The [`examples/`](./examples) folder is intended to be run in order:
 - Presto on GPU: TPC-H SF1000 in 99.9s on a GH200 Grace Hopper Superchip vs. 1,246s on an AMD 5965X CPU.
 - Spark in hybrid mode: compute-heavy stages such as TPC-DS Q95 (SF100) execute on GPU while remaining stages run on CPU.
 
-The integration requires no changes to existing Presto or Spark queries; cuDF executes beneath the query engine via Velox. [`examples/relevant_uses.py`](./examples/relevant_uses.py) demonstrates the same pattern at small scale by downloading public NYC TLC taxi data and timing an identical load → filter → groupby → sort pipeline across pandas, cuDF, and Dask-cuDF.
+The integration requires no changes to existing Presto or Spark queries; cuDF executes beneath the query engine via Velox. [`examples/relevant_uses.py`](./examples/relevant_uses.py) demonstrates the same pattern at small scale by downloading public NYC TLC taxi data and timing an identical read → filter → groupby → top-N pipeline across pandas, cuDF, and Dask-cuDF.
 
 ### Notes
 

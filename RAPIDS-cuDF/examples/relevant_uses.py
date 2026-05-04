@@ -1,9 +1,9 @@
 """pandas vs cuDF vs Dask-cuDF benchmark on real public data.
 
-Downloads NYC TLC Yellow Taxi (~50MB), runs the same load -> filter ->
-groupby -> sort pipeline on each backend, prints per-stage timings in ms,
-then deletes the file. See ../README.md for the bigger industry story
-(IBM x NVIDIA / Velox + cuDF).
+Downloads NYC TLC Yellow Taxi (~50MB), runs the same read -> filter ->
+groupby -> top-N pipeline on each backend, prints per-stage timings in
+ms, then deletes the file. See ../README.md for the bigger industry
+story (IBM x NVIDIA / Velox + cuDF).
 """
 
 import os
@@ -57,9 +57,9 @@ def benchmark(lib, path, sync, lazy=False):
     times["groupby"] = (time.perf_counter() - t0) * 1000
 
     t0 = time.perf_counter()
-    _ = go(over10.sort_values("total_amount", ascending=False).head(100))
+    _ = go(over10.nlargest(100, "total_amount"))
     sync()
-    times["sort"] = (time.perf_counter() - t0) * 1000
+    times["top100"] = (time.perf_counter() - t0) * 1000
 
     return times
 
