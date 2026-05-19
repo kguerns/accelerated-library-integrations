@@ -1,4 +1,4 @@
-# [cuRAND]
+# cuRAND
 
 ## Purpose & Prerequisites
 
@@ -12,7 +12,6 @@ Prerequisites: Any NVIDIA GPU, nvcc and CUDA 3.2 or higher.
 Linux: install the CUDA toolkit, including NVCC ( NVIDIA CUDA Compiler )
 
 Brev: buy brev credits, pick a cloud GPU, run the VM from CLI.
-<!-- Verify installation and demonstrate basic functionality through scripts, playbooks, or demos in a scripts/ or examples/ subdirectory. -->
 
 ## Relevant Use Case
 
