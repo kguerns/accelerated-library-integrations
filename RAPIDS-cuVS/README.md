@@ -22,23 +22,27 @@ For the molecular examples, embedding generation is preprocessing. cuVS is the a
 Choose the path that matches your CUDA version. The [cuVS install guide](https://docs.rapids.ai/api/cuvs/stable/build/) has the current compatibility details.
 
 **pip** (CUDA 12 / 13 wheels)
+(Optional) Create a virtual env
 ```bash
-pip install cuvs-cu12 --extra-index-url=https://pypi.nvidia.com
+python3 -m venv .venv
+source .venv/bin/activate
+```
+```bash
+python3 -m pip install cuvs-cu12 --extra-index-url=https://pypi.nvidia.com
 # or
-pip install cuvs-cu13 --extra-index-url=https://pypi.nvidia.com
+python3 -m pip install cuvs-cu13 --extra-index-url=https://pypi.nvidia.com
 ```
 
 Install the molecular example dependencies:
 ```bash
-pip install cupy-cuda12x torch transformers smirk pandas scikit-learn pyarrow
+pip install cupy-cuda13x torch transformers smirk pandas scikit-learn pyarrow
 ```
 
 Use the CuPy wheel that matches your CUDA version; `cupy-cuda12x` is the CUDA 12 example.
 
-**conda** (CUDA 12)
+**conda** (CUDA 13)
 ```bash
-conda create -n rapids-cuvs -c rapidsai -c conda-forge \
-    cuvs python=3.12 cuda-version=12.9
+conda create -n rapids-cuvs -c rapidsai -c conda-forge cuvs cuda-version=13.1
 conda activate rapids-cuvs
 conda install -c conda-forge pytorch transformers pandas scikit-learn pyarrow
 pip install smirk
