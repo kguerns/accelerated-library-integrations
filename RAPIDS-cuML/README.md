@@ -70,6 +70,10 @@ python examples/wine_quality_cuml.py
 
 `examples/SETUP.md` has the step-by-step runbook for Brev or DGX Spark.
 
+Example output from running the project on a Brev GPU instance:
+
+![Brev cuML run](./screenshots/brev_and_dgx.png)
+
 ## Relevant Use Case
 
 **First Bowl of Soup: Food and beverage quality prediction**
