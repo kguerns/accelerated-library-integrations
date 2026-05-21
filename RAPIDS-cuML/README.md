@@ -5,7 +5,7 @@ cuML is the machine learning library in RAPIDS. The simple way to explain it:
 > cuML lets Python data science code train machine learning models on NVIDIA
 > GPUs using an API that feels similar to scikit-learn.
 
-This project uses cuML on a small wine quality dataset. The goal is to predict
+This project uses cuML on a small wine quality dataset (kaggle). The goal is to predict
 a wine's quality score from lab measurements like acidity, sugar, pH, density,
 and alcohol.
 
