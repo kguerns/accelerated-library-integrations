@@ -1,0 +1,9 @@
+platform_label,benchmark,mode,device_name,cudnn_version,batch_size,latency_ms,throughput_img_s,speedup_vs_cpu
+nsys_brev_labeled,conv2d,CPU baseline,x86_64,91900,32,460.4455480002798,69.49790293114215,1.0
+nsys_brev_labeled,conv2d,"GPU, cuDNN disabled",NVIDIA L4,91900,32,10.8274564743042,2955.449423966066,42.52573530016146
+nsys_brev_labeled,conv2d,"GPU, cuDNN enabled",NVIDIA L4,91900,32,6.099520206451416,5246.31428651615,75.48881426989455
+nsys_brev_labeled,conv2d,"GPU, cuDNN enabled + autotune",NVIDIA L4,91900,32,6.1244797706604,5224.933577754222,75.18116888981578
+nsys_brev_labeled,resnet18,CPU baseline,x86_64,91900,32,993.0933229989023,32.22255075018299,1.0
+nsys_brev_labeled,resnet18,"GPU, cuDNN disabled",NVIDIA L4,91900,32,29.061216354370117,1101.123903755252,34.17246239418209
+nsys_brev_labeled,resnet18,"GPU, cuDNN enabled",NVIDIA L4,91900,32,9.290304183959961,3444.4512651425484,106.89567352525583
+nsys_brev_labeled,resnet18,"GPU, cuDNN enabled + autotune",NVIDIA L4,91900,32,9.224384307861328,3469.066219707318,107.65957811976189
