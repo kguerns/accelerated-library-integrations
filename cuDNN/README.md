@@ -6,7 +6,7 @@ neural network execution. Most developers do not call cuDNN directly; they use
 a framework, and the framework routes operations such as convolution, pooling,
 normalization, activation, attention, and recurrent layers into cuDNN.
 
-The short SA version:
+The short version:
 
 > cuDNN is the hidden acceleration layer that turns ordinary deep learning code
 > into optimized NVIDIA GPU work.
@@ -100,7 +100,7 @@ cuDNN fits into the workflow under the model framework:
    normalization, pointwise ops, and other neural network primitives.
 6. The application streams the answer back to the user and logs feedback.
 
-This is relevant to an SA because the integration path is low friction: partners
+This is relevant for the integration path is low friction: partners
 can keep a familiar PyTorch or framework-based workflow while cuDNN maps
 supported model operations to optimized NVIDIA GPU kernels.
 
