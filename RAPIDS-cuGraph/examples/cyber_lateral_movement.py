@@ -6,7 +6,7 @@ Vertical: enterprise cybersecurity (SOC, threat hunting, incident response).
 Data: a slice of the Los Alamos National Lab "Comprehensive, Multi-Source
 Cyber-Security Events" dataset (CC0). Each row is one Windows authentication
 event between a source computer and a destination computer. A small number
-of rows are flagged is_redteam=1: these are real, labeled red-team
+of rows are flagged with is_redteam=1: these are real, labeled red-team
 compromise events from a 58-day enterprise exercise.
 
 Workflow this script demonstrates:
@@ -120,7 +120,7 @@ def main():
     risk["distance"] = risk["distance"].fillna(-1).astype("int32")
     # proximity: closer to the seed -> higher. Unreachable hosts (distance < 0)
     # score 0. Vectorized so it stays on the GPU (no per-row Python UDF).
-    risk["proximity"] = (1.0 / (risk["distance"] + 1)).where(
+    risk["proximity"] = (1.0 / (risk["distance"].clip(lower=0) + 1)).where(
         risk["distance"] >= 0, 0.0
     )
     risk["risk_score"] = risk["pagerank"] * 100.0 + risk["proximity"] * 10.0

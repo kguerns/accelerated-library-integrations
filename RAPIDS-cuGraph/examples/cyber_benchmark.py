@@ -32,7 +32,7 @@ try:
     import cupy as cp
 except ImportError as exc:
     raise SystemExit(
-        "This benchmark needs RAPIDS cuDF/cuGraph/cuPy on a CUDA machine. "
+        "This benchmark needs RAPIDS cuDF/cuGraph/CuPy on a CUDA machine. "
         "Run it with /home/ubuntu/.venv/bin/python."
     ) from exc
 

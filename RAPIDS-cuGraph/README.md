@@ -73,7 +73,7 @@ python examples/basic_uses.py
 
 This script starts with a cuDF edge list, builds cuGraph graph objects, and
 demonstrates PageRank, BFS, and weakly connected components. The full setup and
-runbook is in [`examples/SETUP.md`](./examples/SETUP.md).
+runbook is in [`examples/SETUP_BASIC_USES.md`](./examples/SETUP_BASIC_USES.md).
 
 ## Relevant Use Case
 
@@ -117,7 +117,7 @@ This connects to AIPS:
 
 ## Files
 
-- `examples/SETUP.md` - setup and runbook for all cuGraph examples.
+- `examples/SETUP_BASIC_USES.md` - setup and runbook for all cuGraph examples.
 - `examples/install_verification.py` - install smoke test for cuDF, cuGraph,
   CUDA, PageRank, and BFS.
 - `examples/basic_uses.py` - small cuDF edge list demo covering PageRank, BFS,

@@ -131,6 +131,7 @@ def main():
 
     red_kept = 0
     normal_kept = 0
+    normal_candidates = 0
     lines_read = 0
     truncated = False
 
@@ -169,9 +170,14 @@ def main():
                     continue
                 if not (red_min <= t_int <= red_max):
                     continue
+
+                # Sample against a counter of eligible normal rows so the
+                # kept-row rate stays at 1/stride regardless of how red-team
+                # density or the time window interact with the modulus.
+                normal_candidates += 1
                 if normal_kept >= args.max_normal:
                     continue
-                if lines_read % args.stride == 0:
+                if normal_candidates % args.stride == 0:
                     writer.writerow(parts + ["0"])
                     normal_kept += 1
         except (EOFError, OSError, zlib.error, gzip.BadGzipFile) as exc:
