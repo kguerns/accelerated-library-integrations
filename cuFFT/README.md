@@ -95,7 +95,7 @@ Sample output is shown below.
 ### Quick Benchmark
 
 To run a quick benchmark, install the [uv](https://docs.astral.sh/uv/getting-started/installation/) package manager
-and run `uv run benchmark.py`.
+and run `uv run benchmark.py`. This benchmark uses PyTorch as a frontend.
 
 Example results running on a DGX Spark (B10 GPU, CUDA 13), presented time is median
 wall clock time over 100 runs excluding host <-> device copies.
