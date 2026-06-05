@@ -54,13 +54,14 @@ Module warp._src.fem.space.basis_space.dyn.fill_node_positions_93a2f4f4 e693b8f 
 | --- | --- |
 | [`gravity.py`](/warp/examples/gravity.py) |   Terminal output similar to the example above. Try toggling the cpu / cuda flag in [`gravity.py`](/warp/examples/gravity.py) with `wp.set_device("cpu")` and `wp.set_device("cuda")`. |
 | [`example_mesh.py`](/warp/examples/example_mesh.py) |  This example simulates particles falling on an object mesh. You can change the object by        |
+| [`examples/rl/`](/warp/examples/rl/) | HopperHop PPO benchmark comparing MuJoCo Playground backends: `--impl jax` vs `--impl warp`. Run `python benchmark.py` for a speedup table. |
 
 
 <!-- Verify installation and demonstrate basic functionality through scripts, playbooks, or demos in a scripts/ or examples/ subdirectory. -->
 
 ## Relevant Use Case
 
-<!-- Identify a workflow within an industry (vertical) or segment (horizontal) where this library is highly relevant. Explain how it integrates into the end-to-end workflow. -->
+GPU-accelerated robot learning pipelines are often simulation-bound: collecting millions of environment steps dominates wall-clock training time. MuJoCo Warp (via Playground's `--impl warp`) targets this bottleneck by batching thousands of parallel physics worlds on NVIDIA GPUs, making it relevant for robotics RL, sim-to-real, and policy training workflows where sample throughput matters more than single-step latency.
 
 ## Helpful Links
 
