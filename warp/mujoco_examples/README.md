@@ -1,5 +1,6 @@
 # Mujoco Examples
 
+Examples for benchmarking GPU-accelerated robot learning with [MuJoCo Playground](https://github.com/google-deepmind/mujoco_playground). Playground supports two physics backends: the default **JAX** implementation of MuJoCo MJX, and **Warp** via [`mujoco_warp`](https://github.com/google-deepmind/mujoco_warp). The benchmark script trains a PPO agent on the `CartpoleBalance` environment across both backends and several parallel-environment counts, so you can compare sample throughput and wall-clock training time on your GPU.
 
 
 ## Requirements
@@ -10,6 +11,8 @@
 ## Mujoco Playground
 [Mujoco Playground](https://github.com/google-deepmind/mujoco_playground/tree/main#) is a suite of GPU-accelerated environments for robot learning built with [MuJoCo MJX](https://github.com/google-deepmind/mujoco/tree/main/mjx), an implementation of the MuJoCo physics engine in JAX. Mujoco Playground (installed from source at [`/mujoco_playground`](/warp/mujoco_examples/mujoco_playground/)) supports both JAX and NVIDIA Warp based backends. While JAX is performant for small environments, the Warp backend leveraging [`mujoco_warp`](https://github.com/google-deepmind/mujoco_warp) enables efficient scaling to larger and more complex scenes. 
 
+
+### Build Mujoco Playground
 To build `mujoco_playground` from source:
 1. Install uv: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 2. From `warp/mujoco_examples`: `cd mujoco_playground`
@@ -23,3 +26,54 @@ To build `mujoco_playground` from source:
 
 
 
+## Run benchmark
+
+[`mujoco_jax_warp.py`](mujoco_jax_warp.py) automates a training sweep that compares the JAX and Warp backends. It:
+
+1. Verifies the Playground installation and triggers a Menagerie asset download.
+2. Runs eight short PPO training jobs on `CartpoleBalance`, pairing `--impl jax` and `--impl warp` at `num_envs` of 512, 1024, 2048, and 4096.
+3. Streams each run's terminal output and saves a copy to `terminal_output.txt` inside that run's log directory.
+
+Complete the [Build Mujoco Playground](#build-mujoco-playground) steps first, then from `warp/mujoco_examples`:
+
+```bash
+python3 mujoco_jax_warp.py
+```
+
+Each run invokes `train-jax-ppo` inside `mujoco_playground/` with `MUJOCO_GL=egl` for headless rendering. Logs, checkpoints, and rollout videos are written under `mujoco_playground/logs/<env_name>-<timestamp>/`.
+
+To run a single training job manually (for example, to try a different environment or backend):
+
+```bash
+cd mujoco_playground
+source .venv/bin/activate
+MUJOCO_GL=egl uv --no-config run train-jax-ppo \
+  --env_name=CartpoleBalance \
+  --impl=warp \
+  --num_timesteps=1000 \
+  --episode_length=500 \
+  --num_envs=2048
+```
+
+<!-- See [`mujoco_jax_warp.sh`](mujoco_jax_warp.sh) for equivalent shell commands. -->
+
+### Key `train-jax-ppo` flags
+
+Flags are defined in [`mujoco_playground/learning/train_jax_ppo.py`](mujoco_playground/learning/train_jax_ppo.py). The benchmark uses a small subset; the most relevant ones are:
+
+| Flag  | Description |
+| --- | --- |
+| `--env_name` | Environment to train on. Any name from Playground's registry (e.g. `CartpoleBalance`, `G1JoystickFlatTerrain`). |
+| `--impl` | Physics backend: `jax` (MuJoCo MJX) or `warp` (MuJoCo Warp). |
+| `--num_timesteps`  | Total environment steps to collect during training. |
+| `--episode_length` | Maximum steps per rollout episode. |
+| `--num_envs` | Number of parallel training environments. Higher values increase GPU utilization but require more memory. |
+| `--num_evals`  | Number of evaluation checkpoints spread across training. |
+| `--num_eval_envs` | Parallel environments used during evaluation rollouts. |
+| `--seed` | Random seed for reproducibility. |
+| `--logdir`  | Root directory for experiment logs. |
+| `--warp_kernel_cache_dir` | Directory for caching compiled Warp kernels across runs. |
+| `--use_wandb`  | Log metrics to Weights & Biases. |
+| `--use_tb` | Log metrics to TensorBoard. |
+
+During training, progress lines report `eval/episode_reward` at each evaluation step. When a run finishes, the script also prints JIT compile time and total training time.

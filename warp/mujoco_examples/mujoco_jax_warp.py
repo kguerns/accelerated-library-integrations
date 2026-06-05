@@ -28,8 +28,8 @@ VERIFY_COMMANDS = [
 
 TRAINING_SWEEP = [
     # vary num_envs for PPO training
-    {"env_name": "CartpoleBalance", "impl": "jax", "num_timesteps": 1000, "episode_length": 500}, # default 1024 envs
-    {"env_name": "CartpoleBalance", "impl": "warp", "num_timesteps": 1000, "episode_length": 500}, # default 1024 envs
+    {"env_name": "CartpoleBalance", "impl": "jax", "num_timesteps": 1000, "episode_length": 500, "num_envs": 1024}, # default 1024 envs
+    {"env_name": "CartpoleBalance", "impl": "warp", "num_timesteps": 1000, "episode_length": 500, "num_envs": 1024}, # default 1024 envs
     {
         "env_name": "CartpoleBalance",
         "impl": "jax",
@@ -57,6 +57,20 @@ TRAINING_SWEEP = [
         "num_timesteps": 1000,
         "episode_length": 500,
         "num_envs": 512,
+    },
+    {
+        "env_name": "CartpoleBalance",
+        "impl": "jax",
+        "num_timesteps": 1000,
+        "episode_length": 500,
+        "num_envs": 4096,
+    },
+    {
+        "env_name": "CartpoleBalance",
+        "impl": "warp",
+        "num_timesteps": 1000,
+        "episode_length": 500,
+        "num_envs": 4096,
     },
 ]
 
