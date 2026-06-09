@@ -13,6 +13,14 @@ This project uses CUDA-Q QEC for one workflow: estimating logical error rates.
 4. Decode the syndrome.
 5. Compare logical errors before and after decoding.
 
+The presentation flow is:
+
+1. **Hello QEC:** the Steane demo shows the smallest complete QEC loop.
+2. **Realistic QEC:** the surface-code memory demo adds repeated syndrome
+   rounds and circuit-level noise.
+3. **Why GPUs matter:** the CPU/GPU syndrome benchmark and LUT vs QLDPC decoder
+   benchmark show throughput and accuracy tradeoffs for repeated QEC work.
+
 ## Purpose & Prerequisites
 
 Physical qubits are noisy. Quantum error correction protects a logical qubit by
@@ -36,21 +44,28 @@ basic flow is:
 
 1. Check the GPU with `nvidia-smi`.
 2. Install the Python requirements.
-3. Run `examples/install_verification.py`.
-4. Run the demos and save outputs in [`results/`](./results).
+3. Run `examples/run_project.py`.
+4. Use the generated CSVs, plots, and summary in [`results/`](./results).
 
 Included examples:
 
+- `examples/run_project.py` runs the standard project workflow with default
+  Brev L4 settings, including the Steane demo, surface-code demos, GPU
+  throughput checks, plots, and summary.
 - `examples/install_verification.py` checks imports, Steane code access, and a
   tiny `single_error_lut` decode.
 - `examples/hello_syndrome.py` sweeps physical bit-flip probability for the
   Steane code and reports raw vs decoded logical error rates.
 - `examples/surface_memory.py` runs one surface-code memory experiment with
   circuit-level noise.
-- `examples/surface_sweep.py` creates surface-code logical error-rate plots.
-- `examples/decoder_benchmark.py` measures decoder throughput on one fixed
-  surface-code workload.
-- `examples/plot_results.py` creates summary plots from CSV outputs.
+- `examples/surface_sweep.py` creates surface-code logical error-rate sweep
+  plots.
+- `examples/cpu_gpu_benchmark.py` compares CPU NumPy and GPU CuPy throughput
+  for the same batched QEC syndrome calculation.
+- `examples/decoder_benchmark.py` compares `single_error_lut` and
+  `nv-qldpc-decoder` on one fixed surface-code workload.
+- `examples/plot_results.py` creates summary plots and `results/SUMMARY.md`
+  from CSV outputs.
 
 ## Relevant Use Case
 
@@ -64,8 +79,8 @@ error-rate measurement.
 
 This connects to AIPS:
 
-- **Accelerate:** benchmark GPU-capable QEC decoders for high-throughput
-  syndrome decoding.
+- **Accelerate:** compare lookup-table decoding with GPU-capable QLDPC decoding
+  for QEC throughput and logical error-rate tradeoffs.
 - **Integrate:** add QEC experiments to an existing CUDA-Q Python or C++
   workflow.
 - **Promote:** show logical error-rate plots and decoder-throughput results

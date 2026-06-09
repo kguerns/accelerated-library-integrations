@@ -1,19 +1,11 @@
 # CUDA-Q QEC Setup
 
-Run these commands from the repo root on a Brev L4 instance. The scripts use
-Brev L4 output filenames by default.
+Run these commands from the repo root on a Brev L4 instance.
 
-## 1. Check The GPU
+## 1. Environment
 
 ```bash
 nvidia-smi
-```
-
-This should show the NVIDIA GPU, driver, and CUDA version visible to the host.
-
-## 2. Create The Environment
-
-```bash
 cd CUDA-Q-QEC
 python3 -m venv .venv
 source .venv/bin/activate
@@ -21,88 +13,76 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-If pip installation fails because of CUDA-QX compatibility, use the CUDA-QX
-container instead:
+If pip installation fails because of CUDA-QX compatibility, use the official
+CUDA-QX container from the installation guide.
+
+## 2. Standard Run
 
 ```bash
-docker pull ghcr.io/nvidia/cudaqx
-docker run --gpus all -it \
-  -v "$PWD:/workspace/accelerated-library-integrations" \
-  ghcr.io/nvidia/cudaqx
-cd /workspace/accelerated-library-integrations/CUDA-Q-QEC
-python -m pip install -r requirements.txt
+python examples/run_project.py
 ```
 
-## 3. Verify The Install
+This runs:
+
+- install verification
+- Steane code-capacity demo for the basic QEC loop
+- surface-code memory demo for the realistic QEC workflow
+- CPU vs GPU syndrome-throughput benchmark
+- LUT and QLDPC surface-code sweeps
+- LUT vs QLDPC decoder benchmark at distance 7
+- result plotting and summary generation
+
+The main outputs are written to `results/`.
+
+If the QLDPC decoder is unavailable in the current environment, run:
+
+```bash
+python examples/run_project.py --skip-qldpc
+```
+
+If CuPy is unavailable and you only want the QEC demos, run:
+
+```bash
+python examples/run_project.py --skip-cpu-gpu
+```
+
+## 3. Surface Sweeps
+
+The standard run already includes both LUT and QLDPC surface sweeps. To rerun
+the LUT sweep manually:
+
+```bash
+python examples/surface_sweep.py
+```
+
+To rerun the same sweep with the GPU-capable QLDPC decoder:
+
+```bash
+python examples/surface_sweep.py \
+  --decoder nv-qldpc-decoder
+```
+
+Use more shots when you need smoother low-error-rate curves:
+
+```bash
+python examples/surface_sweep.py \
+  --decoder nv-qldpc-decoder \
+  --shots 100000
+```
+
+## 4. Individual Commands
+
+These are useful if you only want one artifact:
 
 ```bash
 python examples/install_verification.py
+python examples/hello_syndrome.py
+python examples/surface_memory.py
+python examples/cpu_gpu_benchmark.py
+python examples/decoder_benchmark.py
+python examples/plot_results.py
 ```
 
-Expected result: the script imports CUDA-Q QEC, loads the Steane code, decodes
-an all-zero syndrome, and prints `PASS`.
-
-## 4. Run The Demos
-
-Run the examples:
-
-```bash
-python examples/hello_syndrome.py --shots 1000
-
-python examples/surface_memory.py \
-  --shots 1000 \
-  --distance 3
-
-python examples/decoder_benchmark.py \
-  --decoder single_error_lut \
-  --shots 10000
-
-python examples/decoder_benchmark.py \
-  --decoder nv-qldpc-decoder \
-  --shots 10000
-
-python examples/decoder_benchmark.py \
-  --decoder nv-qldpc-decoder \
-  --distance 7 \
-  --shots 10000 \
-  --bp-batch-size 10000
-```
-
-These commands write Brev L4-labeled CSV files in `results/`.
-
-If `nv-qldpc-decoder` is unavailable, use `single_error_lut` to verify the
-workflow, then switch to the CUDA-QX container for the final benchmark.
-The QLDPC comparison is an accuracy-throughput tradeoff: LUT is a tiny teaching
-decoder, while QLDPC is the GPU-capable belief-propagation decoder for larger
-workloads.
-
-## 5. Make Surface-Code Sweep Plots
-
-Small teaching graph with the lookup-table decoder:
-
-```bash
-python examples/surface_sweep.py \
-  --decoder single_error_lut \
-  --distances 3 5 \
-  --shots 1000
-```
-
-Larger GPU decoder graph after the small run works:
-
-```bash
-python examples/surface_sweep.py \
-  --decoder nv-qldpc-decoder \
-  --distances 3 5 7 \
-  --shots 100000 \
-  --batch-size 10000
-```
-
-Use more shots when you need to estimate smaller logical error rates.
-
-## 6. Generate Summary Plots
-
-```bash
-python examples/plot_results.py --results-dir results --output-dir results
-```
-
-This creates summary plots from captured Steane and decoder benchmark CSV files.
+The decoder benchmark defaults to distance 7 and 2,000 shots. It compares
+`single_error_lut` and `nv-qldpc-decoder` on the same sampled surface-code
+workload.

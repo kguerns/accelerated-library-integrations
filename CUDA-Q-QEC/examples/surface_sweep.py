@@ -21,7 +21,7 @@ def parse_args():
         default=[0.001, 0.003, 0.005, 0.01, 0.03, 0.05, 0.1],
     )
     parser.add_argument("--shots", type=int, default=1000)
-    parser.add_argument("--batch-size", type=int, default=1000)
+    parser.add_argument("--batch-size", type=int, default=10000)
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--output")
     parser.add_argument("--plot")
