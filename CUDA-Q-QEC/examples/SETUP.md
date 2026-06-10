@@ -18,6 +18,12 @@ CUDA-QX container from the installation guide.
 
 ## 2. Standard Run
 
+Optional cleanup before regenerating artifacts:
+
+```bash
+find results -type f ! -name "ARTIFACTS.md" -delete
+```
+
 ```bash
 python examples/run_project.py
 ```
@@ -32,6 +38,14 @@ This runs:
 - result plotting and summary generation
 
 The main outputs are written to `results/`.
+
+Expected presentation outputs:
+
+- `steane_logical_error_rates.png`
+- `cpu_gpu_speedup.png`
+- `surface_sweep_qldpc_brev_l4.png`
+- `decoder_time_accuracy.png`
+- `SUMMARY.md`
 
 If the QLDPC decoder is unavailable in the current environment, run:
 
