@@ -1,2 +1,2 @@
-code,decoder,distance,rounds,physical_error_probability,shots,logical_errors_without_decoding,logical_errors_with_decoding,logical_error_rate_without_decoding,logical_error_rate_with_decoding
-surface_code,single_error_lut,3,3,0.001,1000,11,7,0.011,0.007
+code,decoder,bp_method,distance,rounds,physical_error_probability,shots,logical_errors_without_decoding,logical_errors_with_decoding,logical_error_rate_without_decoding,logical_error_rate_with_decoding
+surface_code,single_error_lut,,3,3,0.001,1000,4,6,0.004,0.006

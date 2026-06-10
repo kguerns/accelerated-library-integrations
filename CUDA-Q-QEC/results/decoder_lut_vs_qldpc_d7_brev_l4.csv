@@ -1,3 +1,0 @@
-platform,gpu_name,decoder,decode_path,code,distance,rounds,physical_error_probability,shots,warmup,repeats,median_ms,min_ms,max_ms,syndromes_per_second,bp_method,raw_logical_errors,decoded_logical_errors,raw_logical_error_rate,decoded_logical_error_rate,logical_error_reduction_vs_raw,speedup_vs_lut,logical_error_ratio_vs_lut
-brev_l4,NVIDIA L4,single_error_lut,decode_batch,surface_code,7,7,0.001,2000,2,5,26.273854000010033,25.969320000001517,33.00209399998266,76121.30295004441,,153,88,0.0765,0.044,1.7386363636363635,1.0,1.0
-brev_l4,NVIDIA L4,nv-qldpc-decoder,decode_batch,surface_code,7,7,0.001,2000,2,5,48.152942999990955,47.89288699998906,53.79795300001433,41534.32532670694,,153,28,0.0765,0.014,5.464285714285714,0.5456333998114086,0.31818181818181823

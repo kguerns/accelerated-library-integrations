@@ -4,66 +4,91 @@
 
 | p | raw errors | decoded errors | raw rate | decoded rate |
 | --- | ---: | ---: | ---: | ---: |
-| 0.0010 | 3 | 0 | 0.003 | 0 |
-| 0.0030 | 7 | 1 | 0.007 | 0.001 |
-| 0.0100 | 32 | 0 | 0.032 | 0 |
-| 0.0300 | 96 | 20 | 0.096 | 0.02 |
-| 0.0500 | 136 | 46 | 0.136 | 0.046 |
-| 0.1000 | 254 | 143 | 0.254 | 0.143 |
+| 0.0010 | 4 | 0 | 0.004 | 0 |
+| 0.0030 | 11 | 0 | 0.011 | 0 |
+| 0.0100 | 27 | 1 | 0.027 | 0.001 |
+| 0.0300 | 91 | 21 | 0.091 | 0.021 |
+| 0.0500 | 149 | 44 | 0.149 | 0.044 |
+| 0.1000 | 275 | 137 | 0.275 | 0.137 |
 
 ## Surface-Code Logical Error Results
 
-| decoder | distance | p | shots | without decoding | with decoding |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| nv-qldpc-decoder | 3 | 0.0010 | 1000 | 0.015 | 0.008 |
-| nv-qldpc-decoder | 3 | 0.0030 | 1000 | 0.045 | 0.027 |
-| nv-qldpc-decoder | 3 | 0.0050 | 1000 | 0.062 | 0.032 |
-| nv-qldpc-decoder | 3 | 0.0100 | 1000 | 0.106 | 0.061 |
-| nv-qldpc-decoder | 3 | 0.0300 | 1000 | 0.261 | 0.222 |
-| nv-qldpc-decoder | 3 | 0.0500 | 1000 | 0.378 | 0.349 |
-| nv-qldpc-decoder | 3 | 0.1000 | 1000 | 0.493 | 0.496 |
-| nv-qldpc-decoder | 5 | 0.0010 | 1000 | 0.045 | 0.009 |
-| nv-qldpc-decoder | 5 | 0.0030 | 1000 | 0.111 | 0.044 |
-| nv-qldpc-decoder | 5 | 0.0050 | 1000 | 0.174 | 0.08 |
-| nv-qldpc-decoder | 5 | 0.0100 | 1000 | 0.304 | 0.172 |
-| nv-qldpc-decoder | 5 | 0.0300 | 1000 | 0.447 | 0.433 |
-| nv-qldpc-decoder | 5 | 0.0500 | 1000 | 0.515 | 0.52 |
-| nv-qldpc-decoder | 5 | 0.1000 | 1000 | 0.501 | 0.504 |
-| single_error_lut | 3 | 0.0010 | 1000 | 0.011 | 0.007 |
-| single_error_lut | 3 | 0.0010 | 1000 | 0.006 | 0.008 |
-| single_error_lut | 3 | 0.0030 | 1000 | 0.034 | 0.019 |
-| single_error_lut | 3 | 0.0050 | 1000 | 0.054 | 0.024 |
-| single_error_lut | 3 | 0.0100 | 1000 | 0.106 | 0.07 |
-| single_error_lut | 3 | 0.0300 | 1000 | 0.271 | 0.236 |
-| single_error_lut | 3 | 0.0500 | 1000 | 0.385 | 0.357 |
-| single_error_lut | 3 | 0.1000 | 1000 | 0.468 | 0.453 |
-| single_error_lut | 5 | 0.0010 | 1000 | 0.022 | 0.011 |
-| single_error_lut | 5 | 0.0030 | 1000 | 0.104 | 0.061 |
-| single_error_lut | 5 | 0.0050 | 1000 | 0.16 | 0.11 |
-| single_error_lut | 5 | 0.0100 | 1000 | 0.272 | 0.256 |
-| single_error_lut | 5 | 0.0300 | 1000 | 0.445 | 0.445 |
-| single_error_lut | 5 | 0.0500 | 1000 | 0.456 | 0.456 |
-| single_error_lut | 5 | 0.1000 | 1000 | 0.529 | 0.529 |
+| decoder | distance | rounds | p | shots | without decoding | with decoding |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| nv-qldpc-decoder | 3 | 3 | 0.0010 | 1000 | 0.01 | 0.001 |
+| nv-qldpc-decoder | 3 | 3 | 0.0030 | 1000 | 0.031 | 0.018 |
+| nv-qldpc-decoder | 3 | 3 | 0.0050 | 1000 | 0.056 | 0.034 |
+| nv-qldpc-decoder | 3 | 3 | 0.0100 | 1000 | 0.132 | 0.08 |
+| nv-qldpc-decoder | 3 | 3 | 0.0300 | 1000 | 0.28 | 0.212 |
+| nv-qldpc-decoder | 3 | 3 | 0.0500 | 1000 | 0.363 | 0.337 |
+| nv-qldpc-decoder | 3 | 3 | 0.1000 | 1000 | 0.486 | 0.476 |
+| nv-qldpc-decoder | 5 | 3 | 0.0010 | 1000 | 0.016 | 0.009 |
+| nv-qldpc-decoder | 5 | 3 | 0.0030 | 1000 | 0.068 | 0.03 |
+| nv-qldpc-decoder | 5 | 3 | 0.0050 | 1000 | 0.101 | 0.063 |
+| nv-qldpc-decoder | 5 | 3 | 0.0100 | 1000 | 0.215 | 0.145 |
+| nv-qldpc-decoder | 5 | 3 | 0.0300 | 1000 | 0.384 | 0.375 |
+| nv-qldpc-decoder | 5 | 3 | 0.0500 | 1000 | 0.466 | 0.473 |
+| nv-qldpc-decoder | 5 | 3 | 0.1000 | 1000 | 0.515 | 0.513 |
+| nv-qldpc-decoder | 7 | 3 | 0.0010 | 1000 | 0.038 | 0.01 |
+| nv-qldpc-decoder | 7 | 3 | 0.0030 | 1000 | 0.096 | 0.045 |
+| nv-qldpc-decoder | 7 | 3 | 0.0050 | 1000 | 0.145 | 0.081 |
+| nv-qldpc-decoder | 7 | 3 | 0.0100 | 1000 | 0.262 | 0.149 |
+| nv-qldpc-decoder | 7 | 3 | 0.0300 | 1000 | 0.471 | 0.429 |
+| nv-qldpc-decoder | 7 | 3 | 0.0500 | 1000 | 0.49 | 0.496 |
+| nv-qldpc-decoder | 7 | 3 | 0.1000 | 1000 | 0.495 | 0.496 |
+| single_error_lut | 3 | 3 | 0.0010 | 1000 | 0.02 | 0.01 |
+| single_error_lut | 3 | 3 | 0.0030 | 1000 | 0.034 | 0.018 |
+| single_error_lut | 3 | 3 | 0.0050 | 1000 | 0.066 | 0.037 |
+| single_error_lut | 3 | 3 | 0.0100 | 1000 | 0.113 | 0.071 |
+| single_error_lut | 3 | 3 | 0.0300 | 1000 | 0.295 | 0.238 |
+| single_error_lut | 3 | 3 | 0.0500 | 1000 | 0.349 | 0.336 |
+| single_error_lut | 3 | 3 | 0.1000 | 1000 | 0.459 | 0.451 |
+| single_error_lut | 5 | 3 | 0.0010 | 1000 | 0.019 | 0.015 |
+| single_error_lut | 5 | 3 | 0.0030 | 1000 | 0.06 | 0.036 |
+| single_error_lut | 5 | 3 | 0.0050 | 1000 | 0.099 | 0.081 |
+| single_error_lut | 5 | 3 | 0.0100 | 1000 | 0.189 | 0.172 |
+| single_error_lut | 5 | 3 | 0.0300 | 1000 | 0.388 | 0.39 |
+| single_error_lut | 5 | 3 | 0.0500 | 1000 | 0.455 | 0.455 |
+| single_error_lut | 5 | 3 | 0.1000 | 1000 | 0.504 | 0.504 |
+| single_error_lut | 7 | 3 | 0.0010 | 1000 | 0.04 | 0.025 |
+| single_error_lut | 7 | 3 | 0.0030 | 1000 | 0.094 | 0.063 |
+| single_error_lut | 7 | 3 | 0.0050 | 1000 | 0.142 | 0.126 |
+| single_error_lut | 7 | 3 | 0.0100 | 1000 | 0.256 | 0.258 |
+| single_error_lut | 7 | 3 | 0.0300 | 1000 | 0.449 | 0.449 |
+| single_error_lut | 7 | 3 | 0.0500 | 1000 | 0.488 | 0.488 |
+| single_error_lut | 7 | 3 | 0.1000 | 1000 | 0.525 | 0.525 |
 
 ## CPU vs GPU Syndrome Benchmark
 
 | backend | median ms | syndromes/s | speedup vs CPU | scope |
 | --- | ---: | ---: | ---: | --- |
-| cpu_numpy | 321.459 | 311,082 | 1.00x | compute_only |
-| gpu_cupy | 2.901 | 34,473,712 | 110.82x | compute_only |
+| cpu_numpy | 330.050 | 302,984 | 1.00x | compute_only |
+| gpu_cupy | 2.873 | 34,803,285 | 114.87x | compute_only |
 
 ## Decoder Benchmark Results
 
-| decoder | path | distance | GPU | median ms | syndromes/s | speed vs LUT | raw errors | decoded errors | decoded rate | gain vs raw | rate vs LUT |
-| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| nv-qldpc-decoder |  | 7 | NVIDIA L4 | 178.375 | 56,062 | 1.00x | 765/10000 | 167/10000 | 0.0167 |  |  |
-| nv-qldpc-decoder | decode_batch | 7 | NVIDIA L4 | 48.153 | 41,534 | 0.55x | 153/2000 | 28/2000 | 0.014 | 5.46x | 0.32x |
-| single_error_lut |  | 7 | NVIDIA L4 | 136.920 | 73,035 | 1.00x | 805/10000 | 480/10000 | 0.048 |  |  |
-| single_error_lut | decode_batch | 7 | NVIDIA L4 | 26.274 | 76,121 | 1.00x | 153/2000 | 88/2000 | 0.044 | 1.74x | 1.00x |
-| nv-qldpc-decoder |  | 9 | NVIDIA L4 | 516.585 | 19,358 | 1.00x | 1285/10000 | 207/10000 | 0.0207 |  |  |
-| single_error_lut |  | 9 | NVIDIA L4 | 281.636 | 35,507 | 1.00x | 1192/10000 | 1013/10000 | 0.1013 |  |  |
+| variant | decoder | distance | median ms | decoded errors | decoded rate | speed vs LUT | rate vs LUT |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| LUT | single_error_lut | 3 | 3.775 | 9/2000 | 0.0045 | 1.00x | 1.00x |
+| BP=0 | nv-qldpc-decoder | 3 | 4.014 | 9/2000 | 0.0045 | 0.94x | 1.00x |
+| BP=1 | nv-qldpc-decoder | 3 | 3.909 | 9/2000 | 0.0045 | 0.97x | 1.00x |
+| LUT | single_error_lut | 5 | 10.793 | 41/2000 | 0.0205 | 1.00x | 1.00x |
+| BP=0 | nv-qldpc-decoder | 5 | 17.733 | 25/2000 | 0.0125 | 0.61x | 0.61x |
+| BP=1 | nv-qldpc-decoder | 5 | 14.371 | 20/2000 | 0.01 | 0.75x | 0.49x |
+| LUT | single_error_lut | 7 | 27.464 | 94/2000 | 0.047 | 1.00x | 1.00x |
+| BP=0 | nv-qldpc-decoder | 7 | 49.685 | 20/2000 | 0.01 | 0.55x | 0.21x |
+| BP=1 | nv-qldpc-decoder | 7 | 38.330 | 22/2000 | 0.011 | 0.72x | 0.23x |
+| LUT | single_error_lut | 9 | 56.752 | 215/2000 | 0.1075 | 1.00x | 1.00x |
+| BP=0 | nv-qldpc-decoder | 9 | 123.718 | 45/2000 | 0.0225 | 0.46x | 0.21x |
+| BP=1 | nv-qldpc-decoder | 9 | 85.474 | 46/2000 | 0.023 | 0.66x | 0.21x |
 
 ## Decoder Comparison Takeaway
 
-- d=7: QLDPC ran at 0.74x the LUT throughput with 0.38x the LUT logical error rate on the same sampled workload.
-- d=9: QLDPC ran at 0.55x the LUT throughput with 0.20x the LUT logical error rate on the same sampled workload.
+- d=3, BP=0: 0.94x LUT throughput and 1.00x LUT logical error rate.
+- d=3, BP=1: 0.97x LUT throughput and 1.00x LUT logical error rate.
+- d=5, BP=0: 0.61x LUT throughput and 0.61x LUT logical error rate.
+- d=5, BP=1: 0.75x LUT throughput and 0.49x LUT logical error rate.
+- d=7, BP=0: 0.55x LUT throughput and 0.21x LUT logical error rate.
+- d=7, BP=1: 0.72x LUT throughput and 0.23x LUT logical error rate.
+- d=9, BP=0: 0.46x LUT throughput and 0.21x LUT logical error rate.
+- d=9, BP=1: 0.66x LUT throughput and 0.21x LUT logical error rate.
