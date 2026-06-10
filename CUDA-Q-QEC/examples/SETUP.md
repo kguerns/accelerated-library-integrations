@@ -29,7 +29,7 @@ This runs:
 - surface-code memory demo for the realistic QEC workflow
 - CPU vs GPU syndrome-throughput benchmark
 - LUT and QLDPC surface-code sweeps
-- LUT vs QLDPC decoder benchmark at distance 7
+- LUT and BP decoder benchmark for distances 3, 5, 7, and 9
 - result plotting and summary generation
 
 The main outputs are written to `results/`.
@@ -70,6 +70,9 @@ python examples/surface_sweep.py \
   --shots 100000
 ```
 
+The sweep keeps the number of syndrome rounds fixed by default so distance
+comparisons are easier to interpret.
+
 ## 4. Individual Commands
 
 These are useful if you only want one artifact:
@@ -83,6 +86,7 @@ python examples/decoder_benchmark.py
 python examples/plot_results.py
 ```
 
-The decoder benchmark defaults to distance 7 and 2,000 shots. It compares
-`single_error_lut` and `nv-qldpc-decoder` on the same sampled surface-code
-workload.
+The decoder benchmark defaults to 2,000 shots per distance. It compares
+`single_error_lut`, QLDPC `BP=0`, QLDPC `BP=1`, and QLDPC `BP=3` over distances
+3, 5, 7, and 9. NVIDIA documents BP methods 0-3; use `--bp-methods` to override
+the default comparison.

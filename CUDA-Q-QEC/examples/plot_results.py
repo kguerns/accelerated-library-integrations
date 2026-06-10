@@ -27,6 +27,11 @@ def benchmark_rows(rows):
     ]
 
 
+def decoder_rows(rows):
+    current_rows = [row for row in benchmark_rows(rows) if row.get("variant")]
+    return current_rows if current_rows else benchmark_rows(rows)
+
+
 def cpu_gpu_rows(rows):
     return [row for row in rows if row.get("benchmark") == "cpu_gpu_syndrome"]
 
@@ -92,18 +97,6 @@ def plot_cpu_gpu_speedup(plt, rows, output_dir):
     return output
 
 
-def decoder_label(row):
-    decoder = row["decoder"].replace("single_error_lut", "LUT").replace("nv-qldpc-decoder", "QLDPC")
-    label = f"d={row.get('distance', '?')}\n{decoder}"
-    if row.get("mode"):
-        label += f"\n{row['mode']}"
-    if row.get("decode_path"):
-        label += f"\n{row['decode_path'].replace('decode_', '')}"
-    if row.get("bp_method"):
-        label += f"\nbp={row['bp_method']}"
-    return label
-
-
 def decoder_rate(row):
     return float(row.get("logical_error_rate") or row.get("decoded_logical_error_rate"))
 
@@ -116,78 +109,58 @@ def decoder_speedup(row):
     return row.get("speedup_vs_lut") or 1.0
 
 
-def plot_decoder(plt, rows, output_dir):
-    decoder_rows = benchmark_rows(rows)
-    if not decoder_rows:
+def variant_order(variant):
+    if variant == "LUT":
+        return 0
+    if variant.startswith("BP="):
+        try:
+            return int(variant.split("=", 1)[1]) + 1
+        except ValueError:
+            return 99
+    return 99
+
+
+def plot_decoder_time_accuracy(plt, rows, output_dir):
+    selected_rows = decoder_rows(rows)
+    if not selected_rows:
         return
 
-    ordered = sorted(decoder_rows, key=lambda row: (int(row.get("distance", 0)), row["decoder"]))
-    labels = [decoder_label(row) for row in ordered]
-    values = [float(row["syndromes_per_second"]) for row in ordered]
+    distances = sorted({int(row["distance"]) for row in selected_rows})
+    variants = sorted({row.get("variant") or row["decoder"] for row in selected_rows}, key=variant_order)
+    by_key = {
+        (int(row["distance"]), row.get("variant") or row["decoder"]): row
+        for row in selected_rows
+    }
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(labels, values)
-    ax.set(title="CUDA-Q QEC Decoder Throughput", ylabel="Syndromes per second")
-    ax.grid(True, axis="y", alpha=0.3)
-    ax.bar_label(bars, fmt=lambda value: f"{value:,.0f}", padding=3)
+    x = list(range(len(distances)))
+    width = min(0.22, 0.8 / max(len(variants), 1))
+    offsets = [(index - (len(variants) - 1) / 2) * width for index in range(len(variants))]
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5), sharex=True)
+    for index, variant in enumerate(variants):
+        positions = [value + offsets[index] for value in x]
+        time_values = []
+        rate_values = []
+        for distance in distances:
+            row = by_key.get((distance, variant))
+            time_values.append(float(row["median_ms"]) if row else 0)
+            rate_values.append(decoder_rate(row) if row else 0)
+        axes[0].bar(positions, time_values, width, label=variant)
+        axes[1].bar(positions, rate_values, width, label=variant)
+
+    axes[0].set_title("Decoder Time")
+    axes[0].set_ylabel("Median decode time (ms)")
+    axes[1].set_title("Decoder Accuracy")
+    axes[1].set_ylabel("Decoded logical error rate")
+    for ax in axes:
+        ax.set_xlabel("Surface-code distance")
+        ax.set_xticks(x, [str(distance) for distance in distances])
+        ax.grid(True, axis="y", alpha=0.3)
+    axes[1].legend(title="Variant")
+    fig.suptitle("Surface-Code Decoder Time and Accuracy")
     fig.tight_layout()
 
-    output = output_dir / "decoder_throughput.png"
-    fig.savefig(output, dpi=180)
-    plt.close(fig)
-    print(f"Wrote {output}")
-    return output
-
-
-def plot_decoder_accuracy(plt, rows, output_dir):
-    decoder_rows = benchmark_rows(rows)
-    if not decoder_rows:
-        return
-
-    ordered = sorted(decoder_rows, key=lambda row: (int(row["distance"]), row["decoder"]))
-    labels = [decoder_label(row) for row in ordered]
-    values = [decoder_rate(row) for row in ordered]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    bars = ax.bar(labels, values)
-    ax.set(title="CUDA-Q QEC Decoder Logical Error Rate", ylabel="Logical error rate")
-    ax.grid(True, axis="y", alpha=0.3)
-    ax.bar_label(bars, fmt=lambda value: f"{value:.3g}", padding=3)
-    fig.tight_layout()
-
-    output = output_dir / "decoder_logical_error_rate.png"
-    fig.savefig(output, dpi=180)
-    plt.close(fig)
-    print(f"Wrote {output}")
-    return output
-
-
-def plot_decoder_tradeoff(plt, rows, output_dir):
-    decoder_rows = benchmark_rows(rows)
-    if not decoder_rows:
-        return
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    for row in decoder_rows:
-        throughput = float(row["syndromes_per_second"])
-        rate = decoder_rate(row)
-        if rate == 0:
-            rate = 0.5 / float(row["shots"])
-        marker = "o" if row["decoder"] == "nv-qldpc-decoder" else "s"
-        ax.scatter(throughput, rate, marker=marker, s=70)
-        ax.annotate(decoder_label(row).replace("\n", " "), (throughput, rate), xytext=(6, 5), textcoords="offset points")
-
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    ax.set(
-        title="Decoder Speed vs Logical Error Rate",
-        xlabel="Syndromes per second",
-        ylabel="Logical error rate",
-    )
-    ax.grid(True, which="both", alpha=0.3)
-    fig.tight_layout()
-
-    output = output_dir / "decoder_tradeoff.png"
+    output = output_dir / "decoder_time_accuracy.png"
     fig.savefig(output, dpi=180)
     plt.close(fig)
     print(f"Wrote {output}")
@@ -265,54 +238,46 @@ def write_summary(rows, output_dir):
             )
         lines.append("")
 
-    decoder_rows = benchmark_rows(rows)
-    if decoder_rows:
+    selected_decoder_rows = decoder_rows(rows)
+    if selected_decoder_rows:
         lines += [
             "## Decoder Benchmark Results",
             "",
-            "| decoder | path | distance | GPU | median ms | syndromes/s | speed vs LUT | raw errors | decoded errors | decoded rate | gain vs raw | rate vs LUT |",
-            "| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| variant | decoder | distance | median ms | decoded errors | decoded rate | speed vs LUT | rate vs LUT |",
+            "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
         ]
-        for row in sorted(decoder_rows, key=lambda row: (int(row["distance"]), row["decoder"], row.get("decode_path", row.get("mode", "")))):
-            gain = row.get("logical_error_reduction_vs_raw", "")
-            gain_text = f"{float(gain):.2f}x" if gain not in ("", "inf") else gain
+        for row in sorted(selected_decoder_rows, key=lambda row: (int(row["distance"]), variant_order(row.get("variant", row["decoder"])))):
             rate_ratio = row.get("logical_error_ratio_vs_lut", "")
             rate_ratio_text = f"{float(rate_ratio):.2f}x" if rate_ratio else ""
             lines.append(
+                f"| {row.get('variant', row['decoder'])} "
                 f"| {row['decoder']} "
-                f"| {row.get('decode_path') or row.get('mode', '')} "
                 f"| {row['distance']} "
-                f"| {row.get('gpu_name', '')} "
                 f"| {float(row['median_ms']):.3f} "
-                f"| {float(row['syndromes_per_second']):,.0f} "
-                f"| {float(decoder_speedup(row)):.2f}x "
-                f"| {row.get('raw_logical_errors') or row.get('logical_errors_without_decoding', '')}/{row['shots']} "
                 f"| {decoder_errors(row)}/{row['shots']} "
                 f"| {rate(decoder_rate(row))} "
-                f"| {gain_text} "
+                f"| {float(decoder_speedup(row)):.2f}x "
                 f"| {rate_ratio_text} |"
             )
         lines.append("")
 
         lines += ["## Decoder Comparison Takeaway", ""]
         by_distance = {}
-        for row in decoder_rows:
-            by_distance.setdefault(row["distance"], {})[row["decoder"]] = row
+        for row in selected_decoder_rows:
+            by_distance.setdefault(row["distance"], {})[row.get("variant", row["decoder"])] = row
         for distance, group in sorted(by_distance.items(), key=lambda item: int(item[0])):
-            lut = group.get("single_error_lut")
-            qldpc = group.get("nv-qldpc-decoder")
-            if not lut or not qldpc:
+            lut = group.get("LUT")
+            if not lut:
                 continue
-            speed_ratio = float(qldpc["syndromes_per_second"]) / float(lut["syndromes_per_second"])
-            lut_rate = decoder_rate(lut)
-            qldpc_rate = decoder_rate(qldpc)
-            rate_text = "undefined"
-            if lut_rate:
-                rate_text = f"{qldpc_rate / lut_rate:.2f}x the LUT logical error rate"
-            lines.append(
-                f"- d={distance}: QLDPC ran at {speed_ratio:.2f}x the LUT throughput "
-                f"with {rate_text} on the same sampled workload."
-            )
+            for variant, row in sorted(group.items(), key=lambda item: variant_order(item[0])):
+                if variant == "LUT":
+                    continue
+                speed_ratio = float(row["syndromes_per_second"]) / float(lut["syndromes_per_second"])
+                rate_ratio = decoder_rate(row) / decoder_rate(lut) if decoder_rate(lut) else 0
+                lines.append(
+                    f"- d={distance}, {variant}: {speed_ratio:.2f}x LUT throughput "
+                    f"and {rate_ratio:.2f}x LUT logical error rate."
+                )
         lines.append("")
 
     output = output_dir / "SUMMARY.md"
@@ -343,9 +308,7 @@ def main():
     outputs = [
         plot_steane(plt, rows, output_dir),
         plot_cpu_gpu_speedup(plt, rows, output_dir),
-        plot_decoder(plt, rows, output_dir),
-        plot_decoder_accuracy(plt, rows, output_dir),
-        plot_decoder_tradeoff(plt, rows, output_dir),
+        plot_decoder_time_accuracy(plt, rows, output_dir),
         write_summary(rows, output_dir),
     ]
     if not any(outputs):

@@ -18,8 +18,9 @@ The presentation flow is:
 1. **Hello QEC:** the Steane demo shows the smallest complete QEC loop.
 2. **Realistic QEC:** the surface-code memory demo adds repeated syndrome
    rounds and circuit-level noise.
-3. **Why GPUs matter:** the CPU/GPU syndrome benchmark and LUT vs QLDPC decoder
-   benchmark show throughput and accuracy tradeoffs for repeated QEC work.
+3. **Why GPUs matter:** the CPU/GPU syndrome benchmark and decoder
+   time/accuracy benchmark show throughput and accuracy tradeoffs for repeated
+   QEC work.
 
 ## Purpose & Prerequisites
 
@@ -59,11 +60,11 @@ Included examples:
 - `examples/surface_memory.py` runs one surface-code memory experiment with
   circuit-level noise.
 - `examples/surface_sweep.py` creates surface-code logical error-rate sweep
-  plots.
+  plots with fixed syndrome rounds by default.
 - `examples/cpu_gpu_benchmark.py` compares CPU NumPy and GPU CuPy throughput
   for the same batched QEC syndrome calculation.
-- `examples/decoder_benchmark.py` compares `single_error_lut` and
-  `nv-qldpc-decoder` on one fixed surface-code workload.
+- `examples/decoder_benchmark.py` compares LUT and QLDPC BP variants across
+  multiple surface-code distances.
 - `examples/plot_results.py` creates summary plots and `results/SUMMARY.md`
   from CSV outputs.
 
@@ -79,8 +80,8 @@ error-rate measurement.
 
 This connects to AIPS:
 
-- **Accelerate:** compare lookup-table decoding with GPU-capable QLDPC decoding
-  for QEC throughput and logical error-rate tradeoffs.
+- **Accelerate:** compare CPU and GPU-style throughput plus QEC decoder
+  time/accuracy tradeoffs on Brev L4.
 - **Integrate:** add QEC experiments to an existing CUDA-Q Python or C++
   workflow.
 - **Promote:** show logical error-rate plots and decoder-throughput results

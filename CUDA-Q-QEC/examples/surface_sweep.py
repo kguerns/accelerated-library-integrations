@@ -20,6 +20,7 @@ def parse_args():
         nargs="+",
         default=[0.001, 0.003, 0.005, 0.01, 0.03, 0.05, 0.1],
     )
+    parser.add_argument("--rounds", type=int, default=3, help="fixed syndrome rounds for each distance")
     parser.add_argument("--shots", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=10000)
     parser.add_argument("--max-iterations", type=int, default=50)
@@ -30,12 +31,13 @@ def parse_args():
 
 def print_table(rows):
     print()
-    print(f"{'decoder':<18} {'d':>3} {'p':>8} {'shots':>8} {'logical errors':>16} {'rate':>10}")
-    print("-" * 74)
+    print(f"{'decoder':<18} {'d':>3} {'r':>3} {'p':>8} {'shots':>8} {'logical errors':>16} {'rate':>10}")
+    print("-" * 79)
     for row in rows:
         print(
             f"{row['decoder']:<18} "
             f"{row['distance']:>3} "
+            f"{row['rounds']:>3} "
             f"{row['physical_error_probability']:>8.4f} "
             f"{row['shots']:>8} "
             f"{row['logical_errors_with_decoding']:>16} "
@@ -102,6 +104,8 @@ def main():
         sys.exit("FAIL: --shots and --batch-size must be >= 1")
     if any(distance < 3 for distance in args.distances):
         sys.exit("FAIL: --distances must be >= 3")
+    if args.rounds < 1:
+        sys.exit("FAIL: --rounds must be >= 1")
     if any(p < 0 or p > 1 for p in args.p_values):
         sys.exit("FAIL: --p-values must be probabilities in [0, 1]")
 
@@ -111,14 +115,14 @@ def main():
     rows = []
     for distance in args.distances:
         for p in args.p_values:
-            print(f"Running decoder={args.decoder}, d={distance}, p={p}, shots={args.shots}")
+            print(f"Running decoder={args.decoder}, d={distance}, rounds={args.rounds}, p={p}, shots={args.shots}")
             rows.append(
                 run_memory_point(
                     np,
                     cudaq,
                     qec,
                     distance,
-                    distance,
+                    args.rounds,
                     p,
                     args.shots,
                     args.decoder,

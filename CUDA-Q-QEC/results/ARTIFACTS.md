@@ -12,13 +12,10 @@ Suggested artifacts:
 - `surface_sweep_lut_brev_l4.png`
 - `surface_sweep_qldpc_brev_l4.csv`
 - `surface_sweep_qldpc_brev_l4.png`
-- `decoder_lut_vs_qldpc_d7_brev_l4.csv`
-- optional larger-distance decoder CSVs such as `decoder_lut_vs_qldpc_d9_brev_l4.csv`
+- `decoder_lut_bp_sweep_brev_l4.csv`
 - `steane_logical_error_rates.png`
 - `cpu_gpu_speedup.png`
-- `decoder_throughput.png`
-- `decoder_logical_error_rate.png`
-- `decoder_tradeoff.png`
+- `decoder_time_accuracy.png`
 - `SUMMARY.md`
 - terminal screenshots for `nvidia-smi`, install verification, and the final
   benchmark run

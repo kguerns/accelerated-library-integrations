@@ -1,4 +1,4 @@
-"""Benchmark CUDA-Q QEC decoder throughput on one surface-code workload."""
+"""Benchmark decoder time and accuracy on surface-code workloads."""
 
 import argparse
 import platform
@@ -22,18 +22,17 @@ PROJECT = Path(__file__).resolve().parents[1]
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--platform", default="brev_l4", help="label for this run, default: brev_l4")
-    parser.add_argument("--decoder", default=None, help="run one decoder only")
-    parser.add_argument("--decoders", nargs="+", default=["single_error_lut", "nv-qldpc-decoder"])
+    parser.add_argument("--platform", default="brev_l4")
     parser.add_argument("--shots", type=int, default=2000)
-    parser.add_argument("--distance", type=int, default=7)
-    parser.add_argument("--rounds", type=int, default=None)
+    parser.add_argument("--distance", type=int, default=None, help="run one distance only")
+    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7, 9])
+    parser.add_argument("--rounds", type=int, default=None, help="defaults to distance")
     parser.add_argument("--p", type=float, default=0.001)
     parser.add_argument("--warmup", type=int, default=2)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--bp-batch-size", type=int, default=10000)
-    parser.add_argument("--bp-method", type=int, default=None, help="QLDPC BP method, e.g. 1 for min-sum")
+    parser.add_argument("--bp-methods", type=int, nargs="+", default=[0, 1, 3])
     parser.add_argument("--output", help="CSV output path")
     return parser.parse_args()
 
@@ -64,7 +63,7 @@ def decode_single_loop(decoder, syndromes):
     return [decoder.decode(row) for row in syndromes]
 
 
-def decode_batch(decoder, syndromes):
+def decode_all(decoder, syndromes):
     if hasattr(decoder, "decode_batch"):
         return decoder.decode_batch(syndromes)
     return decode_single_loop(decoder, syndromes)
@@ -75,9 +74,8 @@ def decoder_path(decoder):
 
 
 def time_decode(decoder, syndromes, warmup, repeats):
-    decode_fn = decode_batch
     for _ in range(warmup):
-        decode_fn(decoder, syndromes)
+        decode_all(decoder, syndromes)
     synchronize_gpu()
 
     samples = []
@@ -85,10 +83,16 @@ def time_decode(decoder, syndromes, warmup, repeats):
     for _ in range(repeats):
         synchronize_gpu()
         start = time.perf_counter()
-        last_results = decode_fn(decoder, syndromes)
+        last_results = decode_all(decoder, syndromes)
         synchronize_gpu()
         samples.append((time.perf_counter() - start) * 1000)
     return samples, last_results
+
+
+def decoder_variants(bp_methods):
+    variants = [("LUT", "single_error_lut", None)]
+    variants += [(f"BP={bp}", "nv-qldpc-decoder", bp) for bp in bp_methods]
+    return variants
 
 
 def improvement(raw_errors, decoded_errors):
@@ -97,16 +101,18 @@ def improvement(raw_errors, decoded_errors):
     return raw_errors / decoded_errors
 
 
-def make_row(args, decoder_name, path, gpu, rounds, samples_ms, decoded, np, logical_z, observables, data):
+def make_row(args, variant, decoder_name, bp_method, path, gpu, distance, rounds, samples_ms, decoded, np, logical_z, observables, data):
     median_ms = statistics.median(samples_ms)
     logical_without, logical_with = count_logical_errors(np, logical_z, observables, data, decoded)
     return {
         "platform": args.platform,
         "gpu_name": gpu,
+        "variant": variant,
         "decoder": decoder_name,
+        "bp_method": bp_method if bp_method is not None else "",
         "decode_path": path,
         "code": "surface_code",
-        "distance": args.distance,
+        "distance": distance,
         "rounds": rounds,
         "physical_error_probability": args.p,
         "shots": args.shots,
@@ -116,7 +122,6 @@ def make_row(args, decoder_name, path, gpu, rounds, samples_ms, decoded, np, log
         "min_ms": min(samples_ms),
         "max_ms": max(samples_ms),
         "syndromes_per_second": args.shots / (median_ms / 1000),
-        "bp_method": args.bp_method if args.bp_method is not None else "",
         "raw_logical_errors": logical_without,
         "decoded_logical_errors": logical_with,
         "raw_logical_error_rate": logical_without / args.shots,
@@ -127,109 +132,130 @@ def make_row(args, decoder_name, path, gpu, rounds, samples_ms, decoded, np, log
     }
 
 
+def fill_lut_comparisons(rows):
+    for distance in sorted({row["distance"] for row in rows}):
+        group = [row for row in rows if row["distance"] == distance]
+        lut = next((row for row in group if row["variant"] == "LUT"), None)
+        if not lut:
+            continue
+
+        lut_speed = float(lut["syndromes_per_second"])
+        lut_rate = float(lut["decoded_logical_error_rate"])
+        for row in group:
+            row["speedup_vs_lut"] = float(row["syndromes_per_second"]) / lut_speed
+            row_rate = float(row["decoded_logical_error_rate"])
+            row["logical_error_ratio_vs_lut"] = row_rate / lut_rate if lut_rate else ""
+
+
+def print_table(rows, gpu, args):
+    print()
+    print(f"GPU:      {gpu}")
+    print(f"Workload: surface_code, p={args.p}, shots={args.shots}")
+    print(f"BP methods: {', '.join(str(bp) for bp in args.bp_methods)}")
+    print()
+    print(
+        f"{'d':>3} {'variant':<8} {'median ms':>10} {'decoded errs':>13} "
+        f"{'decoded rate':>13} {'speed/LUT':>9} {'rate/LUT':>9}"
+    )
+    print("-" * 84)
+    for row in rows:
+        speedup = row["speedup_vs_lut"]
+        speedup_text = f"{float(speedup):.2f}x" if speedup != "" else ""
+        rate_ratio = row["logical_error_ratio_vs_lut"]
+        rate_ratio_text = f"{float(rate_ratio):.2f}x" if rate_ratio != "" else ""
+        print(
+            f"{row['distance']:>3} "
+            f"{row['variant']:<8} "
+            f"{row['median_ms']:>10.3f} "
+            f"{row['decoded_logical_errors']:>13}/{args.shots:<5} "
+            f"{row['decoded_logical_error_rate']:>13.4g} "
+            f"{speedup_text:>9} "
+            f"{rate_ratio_text:>9}"
+        )
+
+
 def main():
     args = parse_args()
-    decoders = [args.decoder] if args.decoder else args.decoders
-
+    distances = [args.distance] if args.distance else args.distances
     if args.output is None:
-        if set(decoders) == {"single_error_lut", "nv-qldpc-decoder"}:
-            output_name = f"decoder_lut_vs_qldpc_d{args.distance}_{args.platform}.csv"
-        else:
-            label = "_".join(decoder.replace("single_error_lut", "lut").replace("nv-qldpc-decoder", "qldpc").replace("-", "_") for decoder in decoders)
-            output_name = f"decoder_{label}_d{args.distance}_{args.platform}.csv"
-        args.output = str(PROJECT / "results" / output_name)
+        args.output = str(PROJECT / "results" / f"decoder_lut_bp_sweep_{args.platform}.csv")
 
     if args.shots < 1 or args.repeats < 1 or args.warmup < 0:
         sys.exit("FAIL: --shots and --repeats must be >= 1; --warmup must be >= 0")
-    if args.distance < 3:
-        sys.exit("FAIL: --distance must be >= 3")
+    if any(distance < 3 for distance in distances):
+        sys.exit("FAIL: distances must be >= 3")
     if args.p < 0 or args.p > 1:
         sys.exit("FAIL: --p must be in [0, 1]")
 
     np, cudaq, qec = load_dependencies()
     cudaq.set_target("stim")
 
-    rounds = args.rounds if args.rounds is not None else args.distance
-    if rounds < 1:
-        sys.exit("FAIL: --rounds must be >= 1")
-
-    code = qec.get_code("surface_code", distance=args.distance)
-    logical_z = np.asarray(code.get_observables_z(), dtype=np.uint8)
-    state_prep = qec.operation.prep0
-
-    noise = cudaq.NoiseModel()
-    noise.add_all_qubit_channel("x", cudaq.Depolarization2(args.p), 1)
-
-    dem = qec.z_dem_from_memory_circuit(code, state_prep, rounds, noise)
-    h_matrix = np.ascontiguousarray(dem.detector_error_matrix, dtype=np.uint8)
-    observables = np.asarray(dem.observables_flips_matrix, dtype=np.uint8)
-
-    print(
-        f"Preparing one workload "
-        f"(decoders={', '.join(decoders)}, shots={args.shots}, d={args.distance}, p={args.p})..."
-    )
-    syndromes, data = qec.sample_memory_circuit(code, state_prep, args.shots, rounds, noise)
-    syndromes = preprocess_syndromes(np, syndromes, args.shots, rounds, h_matrix.shape[0])
-    data = np.asarray(data, dtype=np.uint8)
-
     gpu = gpu_name()
     rows = []
-    for decoder_name in decoders:
-        decoder = build_decoder(
-            qec,
-            decoder_name,
-            h_matrix,
-            min(args.bp_batch_size, args.shots),
-            args.max_iterations,
-            args.p,
-            args.bp_method,
-        )
-        path = decoder_path(decoder)
-        print(f"Timing {decoder_name} ({path}, warmup={args.warmup}, repeats={args.repeats})...")
-        samples_ms, decoded = time_decode(decoder, syndromes, args.warmup, args.repeats)
-        rows.append(make_row(args, decoder_name, path, gpu, rounds, samples_ms, decoded, np, logical_z, observables, data))
+    for distance in distances:
+        rounds = args.rounds if args.rounds is not None else distance
+        if rounds < 1:
+            sys.exit("FAIL: --rounds must be >= 1")
 
-    lut = next((row for row in rows if row["decoder"] == "single_error_lut"), None)
-    if lut:
-        for row in rows:
-            row["speedup_vs_lut"] = float(row["syndromes_per_second"]) / float(lut["syndromes_per_second"])
-            lut_rate = float(lut["decoded_logical_error_rate"])
-            row_rate = float(row["decoded_logical_error_rate"])
-            row["logical_error_ratio_vs_lut"] = row_rate / lut_rate if lut_rate else ""
+        code = qec.get_code("surface_code", distance=distance)
+        logical_z = np.asarray(code.get_observables_z(), dtype=np.uint8)
+        state_prep = qec.operation.prep0
 
+        noise = cudaq.NoiseModel()
+        noise.add_all_qubit_channel("x", cudaq.Depolarization2(args.p), 1)
+
+        dem = qec.z_dem_from_memory_circuit(code, state_prep, rounds, noise)
+        h_matrix = np.ascontiguousarray(dem.detector_error_matrix, dtype=np.uint8)
+        observables = np.asarray(dem.observables_flips_matrix, dtype=np.uint8)
+
+        print(f"Preparing d={distance}, rounds={rounds}, shots={args.shots}, p={args.p}...")
+        syndromes, data = qec.sample_memory_circuit(code, state_prep, args.shots, rounds, noise)
+        syndromes = preprocess_syndromes(np, syndromes, args.shots, rounds, h_matrix.shape[0])
+        data = np.asarray(data, dtype=np.uint8)
+
+        for variant, decoder_name, bp_method in decoder_variants(args.bp_methods):
+            try:
+                decoder = build_decoder(
+                    qec,
+                    decoder_name,
+                    h_matrix,
+                    min(args.bp_batch_size, args.shots),
+                    args.max_iterations,
+                    args.p,
+                    bp_method,
+                )
+            except SystemExit as exc:
+                print(f"Skipping {variant} at d={distance}: {exc}")
+                continue
+
+            path = decoder_path(decoder)
+            print(f"Timing {variant} ({path}, warmup={args.warmup}, repeats={args.repeats})...")
+            samples_ms, decoded = time_decode(decoder, syndromes, args.warmup, args.repeats)
+            rows.append(
+                make_row(
+                    args,
+                    variant,
+                    decoder_name,
+                    bp_method,
+                    path,
+                    gpu,
+                    distance,
+                    rounds,
+                    samples_ms,
+                    decoded,
+                    np,
+                    logical_z,
+                    observables,
+                    data,
+                )
+            )
+
+    if not rows:
+        sys.exit("FAIL: no decoder benchmark rows were generated")
+
+    fill_lut_comparisons(rows)
     write_csv(Path(args.output), rows)
-
-    print()
-    print(f"GPU:      {gpu}")
-    print(f"Workload: surface_code d={args.distance}, rounds={rounds}, p={args.p}, shots={args.shots}")
-    if "nv-qldpc-decoder" in decoders:
-        print(f"BP:      {args.bp_method if args.bp_method is not None else 'default'}")
-    print()
-    print(
-        f"{'decoder':<18} {'path':<12} {'median ms':>10} {'syndromes/s':>14} "
-        f"{'speed/LUT':>9} {'raw errs':>10} {'decoded errs':>13} "
-        f"{'decoded rate':>13} {'gain':>8} {'rate/LUT':>9}"
-    )
-    print("-" * 122)
-    for row in rows:
-        speedup = row["speedup_vs_lut"]
-        speedup_text = f"{float(speedup):.2f}x" if speedup != "" else ""
-        gain = row["logical_error_reduction_vs_raw"]
-        gain_text = f"{float(gain):.2f}x" if gain not in ("", "inf") else gain
-        rate_ratio = row["logical_error_ratio_vs_lut"]
-        rate_ratio_text = f"{float(rate_ratio):.2f}x" if rate_ratio != "" else ""
-        print(
-            f"{row['decoder']:<18} "
-            f"{row['decode_path']:<12} "
-            f"{row['median_ms']:>10.3f} "
-            f"{row['syndromes_per_second']:>14,.1f} "
-            f"{speedup_text:>9} "
-            f"{row['raw_logical_errors']:>10} "
-            f"{row['decoded_logical_errors']:>13} "
-            f"{row['decoded_logical_error_rate']:>13.4g} "
-            f"{gain_text:>8} "
-            f"{rate_ratio_text:>9}"
-        )
+    print_table(rows, gpu, args)
     print(f"Wrote {args.output}")
 
 
