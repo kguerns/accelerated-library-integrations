@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--bp-batch-size", type=int, default=10000)
-    parser.add_argument("--bp-methods", type=int, nargs="+", default=[0, 1, 3])
+    parser.add_argument("--bp-methods", type=int, nargs="+", default=[0, 1])
     parser.add_argument("--output", help="CSV output path")
     return parser.parse_args()
 

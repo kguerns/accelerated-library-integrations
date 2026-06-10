@@ -71,7 +71,7 @@ python examples/surface_sweep.py \
 ```
 
 The sweep keeps the number of syndrome rounds fixed by default so distance
-comparisons are easier to interpret.
+comparisons are easier to interpret. It runs distances 3, 5, and 7 by default.
 
 ## 4. Individual Commands
 
@@ -87,6 +87,5 @@ python examples/plot_results.py
 ```
 
 The decoder benchmark defaults to 2,000 shots per distance. It compares
-`single_error_lut`, QLDPC `BP=0`, QLDPC `BP=1`, and QLDPC `BP=3` over distances
-3, 5, 7, and 9. NVIDIA documents BP methods 0-3; use `--bp-methods` to override
-the default comparison.
+`single_error_lut`, QLDPC `BP=0`, and QLDPC `BP=1` over distances 3, 5, 7, and
+9. The Brev CUDA-Q QEC 0.4.0 environment accepts BP methods 0 and 1.

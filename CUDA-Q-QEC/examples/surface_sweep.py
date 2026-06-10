@@ -13,7 +13,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--decoder", default="single_error_lut")
-    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5])
+    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7])
     parser.add_argument(
         "--p-values",
         type=float,
@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument("--shots", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=10000)
     parser.add_argument("--max-iterations", type=int, default=50)
+    parser.add_argument("--bp-method", type=int, default=0, help="QLDPC BP method")
     parser.add_argument("--output")
     parser.add_argument("--plot")
     return parser.parse_args()
@@ -128,6 +129,7 @@ def main():
                     args.decoder,
                     args.batch_size,
                     args.max_iterations,
+                    args.bp_method if args.decoder == "nv-qldpc-decoder" else None,
                 )
             )
 

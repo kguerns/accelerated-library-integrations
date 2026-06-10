@@ -104,7 +104,7 @@ def count_logical_errors(np, logical_z, observables, data, decoded):
     return without_decoding, with_decoding
 
 
-def run_memory_point(np, cudaq, qec, distance, rounds, p, shots, decoder_name, batch_size, max_iterations=50):
+def run_memory_point(np, cudaq, qec, distance, rounds, p, shots, decoder_name, batch_size, max_iterations=50, bp_method=None):
     code = qec.get_code("surface_code", distance=distance)
     logical_z = np.asarray(code.get_observables_z(), dtype=np.uint8)
     state_prep = qec.operation.prep0
@@ -115,7 +115,7 @@ def run_memory_point(np, cudaq, qec, distance, rounds, p, shots, decoder_name, b
     dem = qec.z_dem_from_memory_circuit(code, state_prep, rounds, noise)
     h_matrix = np.ascontiguousarray(dem.detector_error_matrix, dtype=np.uint8)
     observables = np.asarray(dem.observables_flips_matrix, dtype=np.uint8)
-    decoder = build_decoder(qec, decoder_name, h_matrix, min(batch_size, shots), max_iterations, p)
+    decoder = build_decoder(qec, decoder_name, h_matrix, min(batch_size, shots), max_iterations, p, bp_method)
 
     logical_errors_without = 0
     logical_errors_with = 0
@@ -135,6 +135,7 @@ def run_memory_point(np, cudaq, qec, distance, rounds, p, shots, decoder_name, b
     return {
         "code": "surface_code",
         "decoder": decoder_name,
+        "bp_method": bp_method if bp_method is not None else "",
         "distance": distance,
         "rounds": rounds,
         "physical_error_probability": p,

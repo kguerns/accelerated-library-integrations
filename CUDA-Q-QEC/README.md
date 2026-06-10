@@ -59,14 +59,14 @@ Included examples:
   Steane code and reports raw vs decoded logical error rates.
 - `examples/surface_memory.py` runs one surface-code memory experiment with
   circuit-level noise.
-- `examples/surface_sweep.py` creates surface-code logical error-rate sweep
-  plots with fixed syndrome rounds by default.
+- `examples/surface_sweep.py` creates LUT and QLDPC surface-code logical
+  error-rate sweep CSVs with fixed syndrome rounds by default.
 - `examples/cpu_gpu_benchmark.py` compares CPU NumPy and GPU CuPy throughput
   for the same batched QEC syndrome calculation.
 - `examples/decoder_benchmark.py` compares LUT and QLDPC BP variants across
   multiple surface-code distances.
-- `examples/plot_results.py` creates summary plots and `results/SUMMARY.md`
-  from CSV outputs.
+- `examples/plot_results.py` creates combined presentation plots and
+  `results/SUMMARY.md` from CSV outputs.
 
 ## Relevant Use Case
 

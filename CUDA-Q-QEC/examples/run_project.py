@@ -47,6 +47,7 @@ def main():
     print("- cpu_gpu_speedup.png")
     print("- surface_sweep_lut_brev_l4.png")
     print("- surface_sweep_qldpc_brev_l4.png")
+    print("- surface_sweep_combined.png")
     print("- decoder_lut_bp_sweep_brev_l4.csv")
     print("- decoder_time_accuracy.png")
     print("- SUMMARY.md")
