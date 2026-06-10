@@ -24,15 +24,15 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", default="brev_l4")
     parser.add_argument("--shots", type=int, default=2000)
-    parser.add_argument("--distance", type=int, default=None, help="run one distance only")
-    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7, 9])
+    parser.add_argument("--distance", type=int, default=7, help="default presentation workload")
+    parser.add_argument("--distances", type=int, nargs="+", default=None, help="optional distance sweep")
     parser.add_argument("--rounds", type=int, default=None, help="defaults to distance")
     parser.add_argument("--p", type=float, default=0.001)
     parser.add_argument("--warmup", type=int, default=2)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--max-iterations", type=int, default=50)
     parser.add_argument("--bp-batch-size", type=int, default=10000)
-    parser.add_argument("--bp-methods", type=int, nargs="+", default=[0, 1])
+    parser.add_argument("--bp-methods", type=int, nargs="+", default=[0])
     parser.add_argument("--output", help="CSV output path")
     return parser.parse_args()
 
@@ -176,9 +176,10 @@ def print_table(rows, gpu, args):
 
 def main():
     args = parse_args()
-    distances = [args.distance] if args.distance else args.distances
+    distances = args.distances if args.distances else [args.distance]
     if args.output is None:
-        args.output = str(PROJECT / "results" / f"decoder_lut_bp_sweep_{args.platform}.csv")
+        name = "decoder_lut_bp_sweep" if args.distances else f"decoder_lut_bp_d{args.distance}"
+        args.output = str(PROJECT / "results" / f"{name}_{args.platform}.csv")
 
     if args.shots < 1 or args.repeats < 1 or args.warmup < 0:
         sys.exit("FAIL: --shots and --repeats must be >= 1; --warmup must be >= 0")

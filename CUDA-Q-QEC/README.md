@@ -63,8 +63,8 @@ Included examples:
   error-rate sweep CSVs with fixed syndrome rounds by default.
 - `examples/cpu_gpu_benchmark.py` compares CPU NumPy and GPU CuPy throughput
   for the same batched QEC syndrome calculation.
-- `examples/decoder_benchmark.py` compares LUT and QLDPC BP variants across
-  multiple surface-code distances.
+- `examples/decoder_benchmark.py` compares LUT and QLDPC BP=0 at `d=7` by
+  default, with an optional distance sweep.
 - `examples/plot_results.py` creates combined presentation plots and
   `results/SUMMARY.md` from CSV outputs.
 

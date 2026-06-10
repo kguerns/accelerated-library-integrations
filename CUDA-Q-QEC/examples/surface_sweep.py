@@ -13,7 +13,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--decoder", default="single_error_lut")
-    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7])
+    parser.add_argument("--distances", type=int, nargs="+", default=[3, 5, 7, 9, 11])
     parser.add_argument(
         "--p-values",
         type=float,

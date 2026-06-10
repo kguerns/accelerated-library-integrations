@@ -29,7 +29,7 @@ This runs:
 - surface-code memory demo for the realistic QEC workflow
 - CPU vs GPU syndrome-throughput benchmark
 - LUT and QLDPC surface-code sweeps
-- LUT and BP decoder benchmark for distances 3, 5, 7, and 9
+- LUT and BP decoder benchmark at distance 7
 - result plotting and summary generation
 
 The main outputs are written to `results/`.
@@ -71,7 +71,7 @@ python examples/surface_sweep.py \
 ```
 
 The sweep keeps the number of syndrome rounds fixed by default so distance
-comparisons are easier to interpret. It runs distances 3, 5, and 7 by default.
+comparisons are easier to interpret. It runs distances 3, 5, 7, 9, and 11 by default.
 
 ## 4. Individual Commands
 
@@ -86,6 +86,6 @@ python examples/decoder_benchmark.py
 python examples/plot_results.py
 ```
 
-The decoder benchmark defaults to 2,000 shots per distance. It compares
-`single_error_lut`, QLDPC `BP=0`, and QLDPC `BP=1` over distances 3, 5, 7, and
-9. The Brev CUDA-Q QEC 0.4.0 environment accepts BP methods 0 and 1.
+The decoder benchmark defaults to one distance, `d=7`, with 2,000 shots. It
+compares `single_error_lut` and QLDPC `BP=0` for a cleaner presentation graph.
+Use `--distances 3 5 7 9 11` only if you want a full decoder sweep.

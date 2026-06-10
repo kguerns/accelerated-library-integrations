@@ -13,7 +13,7 @@ Suggested artifacts:
 - `surface_sweep_qldpc_brev_l4.csv`
 - `surface_sweep_qldpc_brev_l4.png`
 - `surface_sweep_combined.png`
-- `decoder_lut_bp_sweep_brev_l4.csv`
+- `decoder_lut_bp_d7_brev_l4.csv`
 - `steane_logical_error_rates.png`
 - `cpu_gpu_speedup.png`
 - `decoder_time_accuracy.png`
