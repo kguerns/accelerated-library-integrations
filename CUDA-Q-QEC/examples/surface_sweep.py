@@ -1,4 +1,4 @@
-"""Surface-code logical error-rate sweep for threshold-style QEC plots."""
+"""Circuit-level surface-code logical error-rate sweep."""
 
 import argparse
 import sys
@@ -32,8 +32,11 @@ def parse_args():
 
 def print_table(rows):
     print()
-    print(f"{'decoder':<18} {'d':>3} {'r':>3} {'p':>8} {'shots':>8} {'logical errors':>16} {'rate':>10}")
-    print("-" * 79)
+    print(
+        f"{'decoder':<18} {'d':>3} {'r':>3} {'p':>8} {'shots':>8} "
+        f"{'raw errs':>10} {'decoded errs':>13} {'decoded rate':>13}"
+    )
+    print("-" * 96)
     for row in rows:
         print(
             f"{row['decoder']:<18} "
@@ -41,8 +44,9 @@ def print_table(rows):
             f"{row['rounds']:>3} "
             f"{row['physical_error_probability']:>8.4f} "
             f"{row['shots']:>8} "
-            f"{row['logical_errors_with_decoding']:>16} "
-            f"{row['logical_error_rate_with_decoding']:>10.4g}"
+            f"{row['logical_errors_without_decoding']:>10} "
+            f"{row['logical_errors_with_decoding']:>13} "
+            f"{row['logical_error_rate_with_decoding']:>13.4g}"
         )
 
 
@@ -73,14 +77,23 @@ def plot_results(path, rows):
             key=lambda row: row["physical_error_probability"],
         )
         x = [row["physical_error_probability"] for row in group]
-        y = []
+        raw = []
+        decoded = []
         for row in group:
-            rate = row["logical_error_rate_with_decoding"]
-            if rate == 0:
+            raw_rate = row["logical_error_rate_without_decoding"]
+            decoded_rate = row["logical_error_rate_with_decoding"]
+            if raw_rate == 0:
                 saw_zero = True
-                rate = 0.5 / row["shots"]
-            y.append(rate)
-        ax.plot(x, y, marker="o", label=f"d = {distance}")
+                raw_rate = 0.5 / row["shots"]
+            if decoded_rate == 0:
+                saw_zero = True
+                decoded_rate = 0.5 / row["shots"]
+            raw.append(raw_rate)
+            decoded.append(decoded_rate)
+
+        raw_line = ax.plot(x, raw, marker="o", linestyle="--", alpha=0.55, label=f"d = {distance} raw")
+        color = raw_line[0].get_color()
+        ax.plot(x, decoded, marker="o", color=color, label=f"d = {distance} decoded")
 
     ax.set_xscale("log")
     ax.set_yscale("log")

@@ -19,8 +19,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-verify", action="store_true", help="skip install_verification.py")
     parser.add_argument("--skip-cpu-gpu", action="store_true", help="skip the CPU/GPU speedup benchmark")
-    parser.add_argument("--skip-sweep", action="store_true", help="skip the surface-code sweeps")
-    parser.add_argument("--skip-code-capacity", action="store_true", help="skip the surface-code code-capacity sweep")
+    parser.add_argument("--skip-sweep", action="store_true", help="skip the surface-code sweep")
     parser.add_argument("--skip-qldpc", action="store_true", help="skip QLDPC benchmark and sweep")
     parser.add_argument("--full-surface-sweep", action="store_true", help="include distances 9 and 11")
     return parser.parse_args()
@@ -39,8 +38,6 @@ def main():
         if args.full_surface_sweep:
             sweep_command += ["--distances", "3", "5", "7", "9", "11"]
         run(sweep_command)
-        if not args.skip_code_capacity:
-            run(["examples/surface_code_capacity.py"])
     if not args.skip_qldpc:
         run(["examples/decoder_benchmark.py"])
     run(["examples/plot_results.py"])
@@ -50,7 +47,6 @@ def main():
     print("- steane_logical_error_rates.png")
     print("- cpu_gpu_speedup.png")
     print("- surface_sweep_qldpc_brev_l4.png")
-    print("- surface_code_capacity_qldpc_brev_l4.png")
     print("- decoder_lut_bp_sweep_brev_l4.csv")
     print("- decoder_time_accuracy.png")
     print("- SUMMARY.md")

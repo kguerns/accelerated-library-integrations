@@ -238,34 +238,6 @@ def write_summary(rows, output_dir):
             )
         lines.append("")
 
-    capacity_rows = [
-        row
-        for row in rows
-        if row.get("experiment") == "surface_code_capacity"
-        and row.get("code") == "surface_code"
-        and row.get("decoded_logical_error_rate")
-    ]
-    if capacity_rows:
-        lines += [
-            "## Surface-Code Code-Capacity Sweep",
-            "",
-            "This cleaner accuracy sweep applies direct data errors instead of full circuit-level noise, "
-            "so it better isolates how code distance and decoder choice affect logical error rate.",
-            "",
-            "| decoder | distance | p | shots | raw rate | decoded rate |",
-            "| --- | ---: | ---: | ---: | ---: | ---: |",
-        ]
-        for row in sorted(capacity_rows, key=lambda row: (int(row["distance"]), float(row["physical_error_probability"]))):
-            lines.append(
-                f"| {row['decoder']} "
-                f"| {row['distance']} "
-                f"| {float(row['physical_error_probability']):.4f} "
-                f"| {row['shots']} "
-                f"| {rate(row['raw_logical_error_rate'])} "
-                f"| {rate(row['decoded_logical_error_rate'])} |"
-            )
-        lines.append("")
-
     comparison_rows = cpu_gpu_rows(rows)
     if comparison_rows:
         lines += [

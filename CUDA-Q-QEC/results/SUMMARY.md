@@ -41,34 +41,6 @@ It still may not match published threshold plots exactly because decoder choice,
 | nv-qldpc-decoder | 7 | 7 | 0.0070 | 10000 | 0.3484 | 0.1831 |
 | nv-qldpc-decoder | 7 | 7 | 0.0100 | 10000 | 0.4007 | 0.2774 |
 
-## Surface-Code Code-Capacity Sweep
-
-This cleaner accuracy sweep applies direct data errors instead of full circuit-level noise, so it better isolates how code distance and decoder choice affect logical error rate.
-
-| decoder | distance | p | shots | raw rate | decoded rate |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| nv-qldpc-decoder | 3 | 0.0001 | 100000 | 0.00032 | 0.0002 |
-| nv-qldpc-decoder | 3 | 0.0002 | 100000 | 0.0005 | 0.00036 |
-| nv-qldpc-decoder | 3 | 0.0005 | 100000 | 0.0016 | 0.00115 |
-| nv-qldpc-decoder | 3 | 0.0010 | 100000 | 0.00333 | 0.00225 |
-| nv-qldpc-decoder | 3 | 0.0020 | 100000 | 0.00605 | 0.00427 |
-| nv-qldpc-decoder | 3 | 0.0030 | 100000 | 0.00907 | 0.00614 |
-| nv-qldpc-decoder | 3 | 0.0050 | 100000 | 0.01556 | 0.01069 |
-| nv-qldpc-decoder | 5 | 0.0001 | 100000 | 0.00055 | 0.00046 |
-| nv-qldpc-decoder | 5 | 0.0002 | 100000 | 0.00097 | 0.00078 |
-| nv-qldpc-decoder | 5 | 0.0005 | 100000 | 0.00251 | 0.00205 |
-| nv-qldpc-decoder | 5 | 0.0010 | 100000 | 0.00494 | 0.00398 |
-| nv-qldpc-decoder | 5 | 0.0020 | 100000 | 0.00921 | 0.0073 |
-| nv-qldpc-decoder | 5 | 0.0030 | 100000 | 0.01418 | 0.01132 |
-| nv-qldpc-decoder | 5 | 0.0050 | 100000 | 0.02445 | 0.01943 |
-| nv-qldpc-decoder | 7 | 0.0001 | 100000 | 0.00089 | 0.0008 |
-| nv-qldpc-decoder | 7 | 0.0002 | 100000 | 0.00137 | 0.00115 |
-| nv-qldpc-decoder | 7 | 0.0005 | 100000 | 0.00334 | 0.00297 |
-| nv-qldpc-decoder | 7 | 0.0010 | 100000 | 0.00662 | 0.00574 |
-| nv-qldpc-decoder | 7 | 0.0020 | 100000 | 0.01408 | 0.01207 |
-| nv-qldpc-decoder | 7 | 0.0030 | 100000 | 0.02036 | 0.01775 |
-| nv-qldpc-decoder | 7 | 0.0050 | 100000 | 0.03502 | 0.03007 |
-
 ## CPU vs GPU Syndrome Benchmark
 
 | backend | median ms | syndromes/s | speedup vs CPU | scope |

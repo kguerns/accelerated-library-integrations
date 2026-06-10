@@ -1,23 +1,7 @@
-"""Surface-code memory experiment with circuit-level noise."""
+"""Shared helpers for surface-code memory experiments."""
 
-import argparse
 import csv
 import sys
-from pathlib import Path
-
-
-PROJECT = Path(__file__).resolve().parents[1]
-DEFAULT_OUTPUT = PROJECT / "results" / "surface_brev_l4.csv"
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--shots", type=int, default=1000, help="number of shots")
-    parser.add_argument("--distance", type=int, default=3, help="surface-code distance")
-    parser.add_argument("--rounds", type=int, default=None, help="defaults to distance")
-    parser.add_argument("--p", type=float, default=0.001, help="physical error rate")
-    parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="CSV output path")
-    return parser.parse_args()
 
 
 def load_dependencies():
@@ -155,53 +139,3 @@ def write_csv(path, rows):
         writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         writer.writeheader()
         writer.writerows(rows)
-
-
-def main():
-    args = parse_args()
-    if args.shots < 1:
-        sys.exit("FAIL: --shots must be >= 1")
-    if args.distance < 3:
-        sys.exit("FAIL: --distance must be >= 3")
-    if args.p < 0 or args.p > 1:
-        sys.exit("FAIL: --p must be in [0, 1]")
-
-    np, cudaq, qec = load_dependencies()
-    cudaq.set_target("stim")
-
-    rounds = args.rounds if args.rounds is not None else args.distance
-    if rounds < 1:
-        sys.exit("FAIL: --rounds must be >= 1")
-
-    print(
-        f"Sampling {args.shots} surface-code memory shots "
-        f"(distance={args.distance}, rounds={rounds}, p={args.p})..."
-    )
-    row = run_memory_point(
-        np,
-        cudaq,
-        qec,
-        args.distance,
-        rounds,
-        args.p,
-        args.shots,
-        "single_error_lut",
-        args.shots,
-    )
-    write_csv(Path(args.output), row)
-
-    print()
-    print("Decoder: single_error_lut")
-    print(
-        "Logical errors without decoding: "
-        f"{row['logical_errors_without_decoding']}/{args.shots}"
-    )
-    print(
-        "Logical errors with decoding:    "
-        f"{row['logical_errors_with_decoding']}/{args.shots}"
-    )
-    print(f"Wrote {args.output}")
-
-
-if __name__ == "__main__":
-    main()
