@@ -13,16 +13,6 @@ This project uses CUDA-Q QEC for one workflow: estimating logical error rates.
 4. Decode the syndrome.
 5. Compare logical errors before and after decoding.
 
-The presentation flow is:
-
-1. **Hello QEC:** the Steane demo shows the smallest complete QEC loop.
-2. **Realistic QEC:** the circuit-level surface-code memory sweep adds repeated
-   syndrome rounds, circuit-level noise, a GPU-capable decoder, and raw vs
-   decoded logical error-rate curves.
-3. **Why GPUs matter:** the CPU/GPU syndrome benchmark and decoder
-   time/accuracy benchmark show throughput and accuracy tradeoffs for repeated
-   QEC work.
-
 ## Purpose & Prerequisites
 
 Physical qubits are noisy. Quantum error correction protects a logical qubit by
