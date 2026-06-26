@@ -1,0 +1,39 @@
+W0626 06:26:48.074000 28654 torch/distributed/run.py:851] 
+W0626 06:26:48.074000 28654 torch/distributed/run.py:851] *****************************************
+W0626 06:26:48.074000 28654 torch/distributed/run.py:851] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0626 06:26:48.074000 28654 torch/distributed/run.py:851] *****************************************
+
+NCCL Basic Collectives Demo
+GPUs: 2  |  NCCL version: (2, 28, 9)
+NOTE: Bandwidth numbers are meaningful at 2+ GPUs only
+/home/shadeform/accelerated-library-integrations/NCCL/nccl-env/lib/python3.10/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+
+=== AllReduce ===
+Before: GPU0=[1.00]  GPU1=[1.00]
+After:  GPU0=[2.00]  GPU1=[2.00]
+Latency: 290.291 ms  |  Bandwidth: 0.00 GB/s  |  Correct: ✓
+
+=== Broadcast ===
+Before: GPU0=[5.00]  GPU1=[0.00]
+After:  GPU0=[5.00]  GPU1=[5.00]
+Latency: 2.245 ms  |  Bandwidth: 0.00 GB/s  |  Correct: ✓
+
+=== AllGather ===
+Before: GPU0=[1.00]  GPU1=[2.00]
+After:  GPU0=[1.00, 2.00] (all GPUs identical)
+Latency: 0.140 ms  |  Bandwidth: 0.00 GB/s  |  Correct: ✓
+
+=== ReduceScatter ===
+Before: GPU0=['1.00', '2.00']  GPU1=['2.00', '4.00']
+After:  GPU0=[3.00]  GPU1=[6.00]
+Latency: 0.116 ms  |  Bandwidth: 0.00 GB/s  |  Correct: ✓
+[rank1]:[W626 06:26:50.422274371 ProcessGroupNCCL.cpp:4094] Warning: An unbatched P2P op (send/recv) was called on this ProcessGroup with size 2.  In lazy initialization mode, this will result in a new 2-rank NCCL communicator to be created. (function operator())
+[rank0]:[W626 06:26:50.422276996 ProcessGroupNCCL.cpp:4094] Warning: An unbatched P2P op (send/recv) was called on this ProcessGroup with size 2.  In lazy initialization mode, this will result in a new 2-rank NCCL communicator to be created. (function operator())
+
+=== Send/Recv ===
+Before: GPU0=[42.00]  GPU1=[0.00]
+After:  GPU0=[42.00]  GPU1=[42.00]
+Latency: 78.785 ms  |  Bandwidth: 0.00 GB/s  |  Correct: ✓
+
+Done.
