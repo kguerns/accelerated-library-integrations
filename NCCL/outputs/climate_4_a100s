@@ -1,0 +1,26 @@
+W0626 06:47:07.077000 32508 torch/distributed/run.py:851] 
+W0626 06:47:07.077000 32508 torch/distributed/run.py:851] *****************************************
+W0626 06:47:07.077000 32508 torch/distributed/run.py:851] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0626 06:47:07.077000 32508 torch/distributed/run.py:851] *****************************************
+
+Atmospheric Heat Diffusion Simulation
+Grid: 1024x1024  |  GPUs: 4  |  Slab per GPU: 1024x256
+Steps: 100  |  Diffusivity (alpha): 0.1
+----------------------------------------------------------------------
+Step   10/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 7.08e-01  |  Comm: 61.58ms
+Step   20/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 3.81e-01  |  Comm: 30.94ms
+Step   30/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 2.47e-01  |  Comm: 20.71ms
+Step   40/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 1.91e-01  |  Comm: 15.60ms
+Step   50/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 1.52e-01  |  Comm: 12.53ms
+Step   60/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 1.26e-01  |  Comm: 10.48ms
+Step   70/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 1.09e-01  |  Comm: 9.02ms
+Step   80/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 9.56e-02  |  Comm: 7.93ms
+Step   90/100  |  Max Temp: 288.0 K  |  Total Energy: 2.8451e+08  |  Convergence: 8.45e-02  |  Comm: 7.09ms
+Step  100/100  |  Max Temp: 287.9 K  |  Total Energy: 2.8451e+08  |  Convergence: 7.59e-02  |  Comm: 6.40ms
+/home/shadeform/accelerated-library-integrations/NCCL/nccl-env/lib/python3.10/site-packages/torch/distributed/c10d_logger.py:83: UserWarning: barrier(): using the device under current context. You can specify `device_id` in `init_process_group` to mute this warning.
+  return func(*args, **kwargs)
+----------------------------------------------------------------------
+Avg step time:  8.62 ms
+Avg comm time:  6.40 ms
+Comm overhead:  74.3%
+Converged:      No (final delta: 7.59e-02)
